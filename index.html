@@ -113,7 +113,7 @@
  const easter=forced==='easter'?true:forced==='normal'?false:Math.random()<0.30;
  let audioCtx=null, audioOutput=null, soundEnabled=false, typingTimer=null, progressFrame=null, questionTimer=null, failTimer=null, currentMode='loading', filmInterval=null, filmPulseTimeouts=[], clockTimer=null, clockBeats=0;
  function unlockAudio(){try{if(!audioCtx){audioCtx=new (window.AudioContext||window.webkitAudioContext)();audioOutput=audioCtx.createDynamicsCompressor();audioOutput.threshold.value=-9;audioOutput.knee.value=8;audioOutput.ratio.value=3;audioOutput.attack.value=.003;audioOutput.release.value=.15;audioOutput.connect(audioCtx.destination)}audioCtx.resume();soundEnabled=true;soundBtn.textContent='소리 켜짐';soundBtn.setAttribute('aria-pressed','true')}catch(e){soundBtn.textContent='소리 사용 불가'}}
- soundBtn.addEventListener('click',()=>{unlockAudio();if(currentMode==='second')startFilm();if(currentMode==='verify')startClock()});
+ soundBtn.addEventListener('click',()=>{unlockAudio();if(['second','transition','verify'].includes(currentMode))startClock()});
  // Overall output loudness. Preserve the lower pitch and slower effect timing.
  const SOUND_VOLUME_MULTIPLIER=11; // >2x the previous source gains; compressor reduces clipping
  // Web Audio synthesized effects, avoiding external sound files and autoplay errors.
@@ -187,14 +187,14 @@
  }
  // Brighter, sacred-sounding clock tick: a crisp attack with a clear, gently ringing tail.
  function clockTick(){
-  if(!soundEnabled||!audioCtx||currentMode!=='verify')return;
+  if(!soundEnabled||!audioCtx||!['second','transition','verify'].includes(currentMode))return;
   const tock=(clockBeats++%2)===1;
   noiseBurst(.016,tock?.044:.052,tock?1700:2200);
   tone(tock?920:1140,.24,.032,'sine');
   tone(tock?1380:1710,.15,.008,'sine');
  }
  function stopClock(){if(clockTimer!==null){clearInterval(clockTimer);clockTimer=null}}
- function startClock(){stopClock();if(currentMode!=='verify')return;clockTick();clockTimer=setInterval(()=>{if(currentMode==='verify')clockTick();else stopClock()},1000)}
+ function startClock(){if(clockTimer!==null)return;if(!['second','transition','verify'].includes(currentMode))return;clockTick();clockTimer=setInterval(()=>{if(['second','transition','verify'].includes(currentMode))clockTick();else stopClock()},1000)}
  function shutterSound(){ // low, weighty vintage camera shutter
   mechanicalImpact(0,1,1);
  }
@@ -238,17 +238,17 @@
  function stopBlackouts(){blackoutTimers.forEach(clearTimeout);blackoutTimers=[];loading.classList.remove('second-blackout')}
  function startBlackouts(){
   stopBlackouts();
-  // Quick irregular complete-black frames, never a bright flash.
-  [620,1240,1380,2180,3010,3160,4020,4780,4910,5510].forEach((when,i)=>{
+  // A single brief full-screen cut once per second, synchronized with the clock tick.
+  for(let second=0;second<6;second++){
    blackoutTimers.push(setTimeout(()=>{
     if(currentMode!=='second')return;
     loading.classList.add('second-blackout');
-    blackoutTimers.push(setTimeout(()=>loading.classList.remove('second-blackout'),i%3===1?155:80));
-   },when));
-  });
+    blackoutTimers.push(setTimeout(()=>loading.classList.remove('second-blackout'),125));
+   },second*1000));
+  }
  }
- function beginSecondLoad(){currentMode='second';startFilm();startBlackouts();const t0=performance.now();function frame(now){if(currentMode!=='second')return;let elapsed=now-t0;let cycle=(elapsed%1500)/1500;let value=100-10*(cycle<.5?cycle*2:(1-cycle)*2);setPercent(value);if(elapsed<6000)progressFrame=requestAnimationFrame(frame);else endSecondLoad()}progressFrame=requestAnimationFrame(frame)}
- function endSecondLoad(){stopFilm();stopBlackouts();currentMode='transition';loading.classList.add('dark-cut');setTimeout(()=>{loading.style.display='none';showVerify()},300)}
+ function beginSecondLoad(){currentMode='second';startClock();startBlackouts();const t0=performance.now();function frame(now){if(currentMode!=='second')return;let elapsed=now-t0;let cycle=(elapsed%1500)/1500;let value=100-10*(cycle<.5?cycle*2:(1-cycle)*2);setPercent(value);if(elapsed<6000)progressFrame=requestAnimationFrame(frame);else endSecondLoad()}progressFrame=requestAnimationFrame(frame)}
+ function endSecondLoad(){stopBlackouts();currentMode='transition';loading.classList.add('dark-cut');setTimeout(()=>{loading.style.display='none';showVerify()},300)}
  function showVerify(){currentMode='verify';verify.style.display='grid';startClock();question.textContent='묻겠습니다. 신도가 맞으신가요?';accept.checked=false;verify.classList.remove('fail');const delay=5000;
   questionTimer=setTimeout(()=>{if(currentMode==='verify'){switchHeadline(question,'지금 그 분을 의심하시는 건가요?');shutterSound()}},delay);
   failTimer=setTimeout(()=>{if(currentMode!=='verify')return;currentMode='failed';stopClock();verify.classList.add('fail');switchHeadline(question,'자격이 없습니다.');shutterSound();setTimeout(()=>showHome('normal'),7000)},delay+5000);

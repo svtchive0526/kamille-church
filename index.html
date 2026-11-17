@@ -341,6 +341,24 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
 @media(min-width:1024px){.auth-fields{max-width:760px}.auth-row{grid-template-columns:165px minmax(0,1fr)}.auth-action{font-size:clamp(15px,1.4vw,19px)}.auth-hint{padding:40px}.oath-callout{min-height:265px}.oath-lines{font-size:20px}}
 @media(max-width:520px){.auth-row{grid-template-columns:25% minmax(0,1fr);gap:9px}.auth-row label{font-size:clamp(13px,3.25vw,17px)}.auth-input{padding:0 12px;font-size:clamp(13px,3.1vw,17px)}.auth-actions{gap:5px}.auth-action{font-size:clamp(11px,2.75vw,15px);padding:8px 5px}.auth-hint{padding:25px 20px}.mail-end{padding:0 9.5%}}
 
+
+/* Launch announcement: centered over either home, with identical layout and theme variants. */
+.launch-overlay[hidden]{display:none!important}
+.launch-overlay{position:fixed;inset:0;z-index:40;display:flex;justify-content:center;align-items:center;padding:22px;overflow-y:auto;overscroll-behavior:contain}
+.launch-overlay::before{content:"";position:fixed;inset:0;background:rgba(255,255,255,.025);pointer-events:none}
+.launch-panel{position:relative;width:min(82.5vw,650px);max-height:calc(100dvh - 44px);overflow-y:auto;overscroll-behavior:contain;padding:clamp(25px,4.9vw,46px) clamp(23px,5.2vw,52px);border:1.5px solid #fff;border-radius:clamp(10px,1.9vw,19px);text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.035);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);letter-spacing:-.065em}
+.launch-overlay.normal .launch-panel{background:rgba(238,238,238,.92);color:#050505}
+.launch-overlay.easter .launch-panel{background:rgba(86,25,227,.91);color:#fff}
+.launch-title{font-size:clamp(20px,4vw,34px);font-weight:900;line-height:1.3;letter-spacing:-.075em;margin:0 0 clamp(27px,5vw,43px);word-break:keep-all}
+.launch-message{font-size:clamp(14px,3.05vw,24px);font-weight:720;line-height:1.52;margin:0;word-break:keep-all}
+.launch-message+.launch-message{margin-top:clamp(8px,1.6vw,16px)}
+.launch-sign{font-size:clamp(15px,3vw,23px);font-weight:820;margin:clamp(25px,5vw,48px) 0 clamp(18px,3.5vw,33px)}
+.launch-close{display:block;width:100%;background:transparent;border:none;color:#999;font-size:clamp(12px,2.5vw,18px);font-weight:600;letter-spacing:-.05em;cursor:pointer;padding:7px 0 2px;touch-action:manipulation}
+.launch-overlay.easter .launch-close{color:#bdb0e4}
+.launch-close:hover,.launch-close:focus-visible{text-decoration:underline;outline-offset:3px}
+@media (min-width:1024px){.launch-panel{width:min(610px,55vw)}.launch-title{font-size:31px}.launch-message{font-size:20px}.launch-sign{font-size:21px}.launch-close{font-size:15px}}
+@media (max-width:450px){.launch-overlay{padding:10px}.launch-panel{width:82vw;padding:clamp(21px,6vw,29px) clamp(18px,5vw,25px)}.launch-title{font-size:clamp(16px,4.5vw,22px);margin-bottom:24px}.launch-message{font-size:clamp(12px,3.5vw,16px)}.launch-sign{font-size:clamp(13px,3.6vw,18px);margin:25px 0 19px}.launch-close{font-size:clamp(11px,3.1vw,14px)}}
+
 </style>
 </head>
 <body>
@@ -354,6 +372,15 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  <label class="verify-check" id="checkLabel"><input id="accept" type="checkbox"><span>신도가 맞습니다.</span></label></div>
 </section>
 <section id="entryLoading" class="entry-loading screen"><div class="entry-noise"><canvas id="tvSnow" aria-hidden="true"></canvas></div><div><div id="entryMessage" class="entry-message">신도님, 반갑습니다.</div><div id="entryPercent" class="entry-number">00%</div></div></section>
+<section id="launchOverlay" class="launch-overlay normal" role="dialog" aria-modal="true" aria-labelledby="launchTitle" hidden>
+ <div class="launch-panel">
+  <h2 id="launchTitle" class="launch-title">카밀레교 간편 사이트가 열렸습니다</h2>
+  <p class="launch-message">기존 카밀레교 사이트에서 꼭 필요한 내용만 선정하여<br class="launch-wide-only"> 간편하게 이용할 수 있는 사이트로 재탄생했습니다</p>
+  <p class="launch-message">신도분들과 카밀레교에 관심있으신 모든 분들이<br class="launch-wide-only"> 모쪼록 잘 사용해주셨음 하는 바람입니다</p>
+  <p class="launch-sign">카밀레교 교주 드림.</p>
+  <button id="launchClose" class="launch-close" type="button">닫으려면 여기를 눌러주세요</button>
+ </div>
+</section>
 <main id="normal" class="home normal screen">
  <h1 class="home-header">카밀레교 사이트 방문을 환영합니다!</h1>
  <div class="cards"><div class="menu-card" role="button" tabindex="0" data-detail="normal" aria-label="카밀레교 소개 보기"><h2 class="card-title">카밀레교</h2><p class="card-description">카밀레교에 대해 궁금한 점이 있으신가요?</p></div>
@@ -753,6 +780,7 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  const ERROR_PREFIX='페이지가 갑자기 다운되었을 경우, 다음을 따라주세요.\n카밀레교 사이트는 기본적으로 두 가지로 제공되고 있습니다.\n등록된 신도일 경우 신도 전용 홈페';
  function showError(){
   if(endingStarted)return;
+  const opening=document.getElementById('launchOverlay');if(opening){opening.hidden=true;document.body.style.overflow=''}
   endingStarted=true;stopVisit();clearNormalFlash();clearLeak();clearTimeout(recoveryTimer);clearTimeout(errorTimer);clearTimeout(mailTimer);clearTimeout(signalTimer);
   $('errorScreen').classList.remove('signal-cut');$('errorSignalOverlay').classList.remove('active');
   stopClock();stopFilm();stopBlackouts();stopTvSnow();
@@ -947,7 +975,22 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  fluxArrow.addEventListener('click',()=>{introIndex=(introIndex+1)%3;paintDetail(detailMode)});
  missionTabs.forEach((button,i)=>button.addEventListener('click',()=>{missionIndex=i;paintDetail(detailMode)}));
 
- function showHome(mode,resetVisit=false){clearNormalFlash();currentMode='home';stopTvSnow();stopBlackouts();stopClock();clearTimeout(questionTimer);clearTimeout(failTimer);verify.style.display='none';loading.style.display='none';entryLoading.style.display='none';stopFilm();$('normal').style.display=mode==='normal'?'block':'none';$('easter').style.display=mode==='easter'?'block':'none';soundBtn.style.display='block';document.body.style.background=mode==='easter'?'#6200ff':'#fff';document.title='카밀레교 | '+(mode==='easter'?'귀의를 환영합니다':'환영합니다');window.scrollTo(0,0);if(mode==='normal')scheduleNormalFlash();startVisit(resetVisit)}
+ let launchShown=false;
+ const launchOverlay=$('launchOverlay');
+ function openLaunchAnnouncement(mode){
+  launchShown=true;
+  launchOverlay.classList.toggle('easter',mode==='easter');
+  launchOverlay.classList.toggle('normal',mode!=='easter');
+  launchOverlay.hidden=false;
+  document.body.style.overflow='hidden';
+  $('launchClose').focus({preventScroll:true});
+ }
+ function closeLaunchAnnouncement(){
+  launchOverlay.hidden=true;
+  document.body.style.overflow='';
+ }
+ $('launchClose').addEventListener('click',closeLaunchAnnouncement);
+ function showHome(mode,resetVisit=false){clearNormalFlash();currentMode='home';stopTvSnow();stopBlackouts();stopClock();clearTimeout(questionTimer);clearTimeout(failTimer);verify.style.display='none';loading.style.display='none';entryLoading.style.display='none';stopFilm();$('normal').style.display=mode==='normal'?'block':'none';$('easter').style.display=mode==='easter'?'block':'none';soundBtn.style.display='block';document.body.style.background=mode==='easter'?'#6200ff':'#fff';document.title='카밀레교 | '+(mode==='easter'?'귀의를 환영합니다':'환영합니다');window.scrollTo(0,0);if(mode==='normal')scheduleNormalFlash();startVisit(resetVisit);if(!launchShown&&!endingStarted)openLaunchAnnouncement(mode)}
 })();
 </script>
 </body>

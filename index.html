@@ -18,18 +18,24 @@
 .loader-label.blink{animation:blinkText .34s steps(1,end) 6}
 @keyframes blinkText{0%,49%{opacity:1}50%,100%{opacity:.06}}
 @media(max-width:520px){.loader-label{font-size:clamp(15px,4.25vw,24px)}.loader-percent{font-size:clamp(20px,5vw,28px);margin-top:17px}}
-/* Dark, low-flash analog interference */
-.glitch-overlay{position:absolute;inset:0;pointer-events:none;opacity:0;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(90,79,109,.10) 4px,transparent 5px),linear-gradient(90deg,transparent 15%,rgba(76,52,94,.13) 50%,transparent 85%);mix-blend-mode:screen}
-.loading.glitching .glitch-overlay{opacity:.85;animation:glitchMove .12s steps(2) infinite}
-.loading.glitching .loader-content{animation:shake .1s steps(2) infinite;text-shadow:2px 0 #44145c,-2px 0 #113845}
+/* Extended low-luminance analog interference: avoids white flashes */
+.glitch-overlay{position:absolute;inset:0;pointer-events:none;opacity:0;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(95,67,115,.23) 4px,transparent 5px),linear-gradient(90deg,transparent 15%,rgba(69,33,98,.28) 50%,transparent 85%);mix-blend-mode:screen}
+.loading.glitching .glitch-overlay{opacity:1;animation:glitchMove .075s steps(2) infinite}
+.loading.glitching .loader-content{animation:shake .07s steps(2) infinite;text-shadow:4px 0 #501868,-4px 0 #13505e}
 @keyframes glitchMove{0%{transform:translate(0)}50%{transform:translate(12px, -5px)}100%{transform:translate(-7px,6px)}}
 @keyframes shake{0%{transform:translate(-3px,1px)}50%{transform:translate(3px,-2px)}100%{transform:translate(0,1px)}}
+ .loading.glitching::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.40) 0 12px,rgba(86,42,100,.20) 12px 14px,transparent 14px 35px);animation:glitchBands .18s steps(3) infinite;opacity:.9}
+@keyframes glitchBands{0%{transform:translateY(-8%)}50%{transform:translateY(5%) skewX(1deg)}100%{transform:translateY(-2%)}}
 .loading.dark-cut .loader-content{opacity:0}
-.sound-toggle{position:fixed;top:max(18px,env(safe-area-inset-top));right:18px;z-index:25;border:1px solid #555;color:#bbb;background:#202020;border-radius:18px;padding:7px 11px;font-size:11px;letter-spacing:0;cursor:pointer}
+/* Deliberate one-second Easter entry handshake */
+.entry-loading{display:none;position:fixed;inset:0;z-index:12;place-items:center;background:#101010;color:#fff;text-align:center;padding:25px}
+.entry-loading .entry-message{font-size:clamp(18px,4.7vw,38px);font-weight:750}
+.entry-loading .entry-number{font-size:clamp(22px,5vw,42px);margin-top:24px;font-variant-numeric:tabular-nums}
+.sound-toggle{position:fixed;bottom:max(24px,calc(env(safe-area-inset-bottom) + 18px));left:50%;transform:translateX(-50%);z-index:25;border:1px solid #555;color:#bbb;background:#202020;border-radius:18px;padding:7px 11px;font-size:11px;letter-spacing:0;cursor:pointer}
 .verify{display:none;position:fixed;inset:0;background:#101010;z-index:11;color:#fff;place-items:center;padding:20px;text-align:center}
 .verify-inner{transform:translateY(-1%);width:100%;}
 .verify-question{font-size:clamp(18px,4.7vw,40px);font-weight:760;line-height:1.4;letter-spacing:-.06em;margin:0 0 26px}
-.verify-question.flicker{animation:blinkText .33s steps(1,end) 6}
+
 .verify-check{display:inline-flex;align-items:center;gap:16px;font-size:clamp(18px,4.7vw,40px);font-weight:540;cursor:pointer;letter-spacing:-.06em}
 .verify-check input{appearance:none;-webkit-appearance:none;flex:none;width:clamp(24px,6vw,51px);height:clamp(24px,6vw,51px);border:3px solid white;border-radius:8px;background:transparent;position:relative;cursor:pointer}
 .verify-check input:checked::after{content:'✓';font-size:clamp(19px,4.6vw,39px);position:absolute;inset:0;display:grid;place-items:center;font-weight:700}
@@ -60,9 +66,10 @@
  <div class="loader-content"><div id="loadText" class="loader-label">접속을 위해 대기중입니다...</div><div id="percent" class="loader-percent">00%</div></div>
 </section>
 <section id="verify" class="verify screen">
- <div class="verify-inner"><h1 class="verify-question flicker" id="verifyQuestion">묻겠습니다. 신도가 맞으신가요?</h1>
+ <div class="verify-inner"><h1 class="verify-question" id="verifyQuestion">묻겠습니다. 신도가 맞으신가요?</h1>
  <label class="verify-check" id="checkLabel"><input id="accept" type="checkbox"><span>신도가 맞습니다.</span></label></div>
 </section>
+<section id="entryLoading" class="entry-loading screen"><div><div class="entry-message">접속 중입니다...</div><div id="entryPercent" class="entry-number">00%</div></div></section>
 <main id="normal" class="home normal screen">
  <h1 class="home-header">카밀레교 사이트 방문을 환영합니다!</h1>
  <div class="cards"><div class="menu-card"><h2 class="card-title">카밀레교</h2><p class="card-description">카밀레교에 대해 궁금한 점이 있으신가요?</p></div>
@@ -81,20 +88,39 @@
 (()=>{
  'use strict';
  const $=id=>document.getElementById(id);
- const loading=$('loading'),label=$('loadText'),percentage=$('percent'),verify=$('verify'),question=$('verifyQuestion'),accept=$('accept'),soundBtn=$('soundBtn');
+ const loading=$('loading'),label=$('loadText'),percentage=$('percent'),verify=$('verify'),question=$('verifyQuestion'),accept=$('accept'),soundBtn=$('soundBtn'),entryLoading=$('entryLoading'),entryPercent=$('entryPercent');
  const params=new URLSearchParams(location.search);
  // TEST ONLY: ?mode=normal or ?mode=easter. Without mode, each visit is random 30%.
  const forced=params.get('mode');
  const easter=forced==='easter'?true:forced==='normal'?false:Math.random()<0.30;
- let audioCtx=null, soundEnabled=false, typingTimer=null, progressFrame=null, branchTimer=null, questionTimer=null, failTimer=null, currentMode='loading';
+ let audioCtx=null, soundEnabled=false, typingTimer=null, progressFrame=null, questionTimer=null, failTimer=null, currentMode='loading', filmInterval=null, filmPulseTimeouts=[];
  function unlockAudio(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume();soundEnabled=true;soundBtn.textContent='소리 켜짐';soundBtn.setAttribute('aria-pressed','true')}catch(e){soundBtn.textContent='소리 사용 불가'}}
- soundBtn.addEventListener('click',unlockAudio);
+ soundBtn.addEventListener('click',()=>{unlockAudio();if(currentMode==='second')startFilm()});
  // Web Audio synthesized effects, avoiding external sound files and autoplay errors.
  function tone(freq=450,duration=.024,volume=.022,type='square'){
   if(!soundEnabled||!audioCtx)return;
   try{const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime;o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(volume,t);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+duration+.005)}catch(e){}
  }
- function glitchSound(){if(!soundEnabled||!audioCtx)return;for(let i=0;i<11;i++)setTimeout(()=>tone(65+Math.random()*340,.035+Math.random()*.045,.032,'sawtooth'),i*30)}
+ // Filtered noise buffers produce convincing mechanical camera sounds without audio files.
+ function noiseBurst(duration=.10,volume=.07,cutoff=1100,at=0){
+  if(!soundEnabled||!audioCtx)return;
+  try{const t=audioCtx.currentTime+at,rate=audioCtx.sampleRate,n=Math.ceil(rate*duration),buffer=audioCtx.createBuffer(1,n,rate),data=buffer.getChannelData(0);
+   for(let i=0;i<n;i++)data[i]=(Math.random()*2-1)*(1-i/n);
+   const source=audioCtx.createBufferSource(),filter=audioCtx.createBiquadFilter(),gain=audioCtx.createGain();source.buffer=buffer;filter.type='lowpass';filter.frequency.value=cutoff;gain.gain.setValueAtTime(volume,t);gain.gain.exponentialRampToValueAtTime(.0001,t+duration);
+   source.connect(filter);filter.connect(gain);gain.connect(audioCtx.destination);source.start(t);source.stop(t+duration+.002)}catch(e){}
+ }
+ function shutterSound(){ // old analog shutter: click, spring, curtain slap
+  noiseBurst(.025,.12,2100,0);noiseBurst(.070,.095,950,.045);noiseBurst(.10,.045,500,.12);
+  tone(195,.045,.018,'triangle');
+ }
+ function filmSound(){ // warped, unsettling reel movement with irregular mechanical ticks
+  if(!soundEnabled||!audioCtx)return;
+  noiseBurst(.13,.035,380);tone(77+Math.random()*45,.14,.017,'sawtooth');
+  if(Math.random()>.30){noiseBurst(.025,.06,1100,.09);tone(240+Math.random()*110,.025,.009,'square')}
+ }
+ function startFilm(){stopFilm();filmSound();filmInterval=setInterval(()=>{if(currentMode==='second')filmSound()},185)}
+ function stopFilm(){if(filmInterval!==null){clearInterval(filmInterval);filmInterval=null}}
+ function glitchSound(){if(!soundEnabled||!audioCtx)return;for(let i=0;i<38;i++)setTimeout(()=>{if(currentMode==='glitch'){noiseBurst(.045,.043,500+Math.random()*1150);tone(55+Math.random()*280,.035+Math.random()*.055,.022,'sawtooth')}},i*32)}
  function setPercent(value){percentage.textContent=String(Math.round(value)).padStart(2,'0')+'%'}
  const TYPE='접속을 위해 대기중입니다...'; let index=0, erasing=false;
  function typeStep(){if(currentMode!=='loading')return;
@@ -106,15 +132,21 @@
  const start=performance.now();
  function animateInitial(now){const progress=Math.min((now-start)/5000,1);setPercent(progress*100);if(progress<1){progressFrame=requestAnimationFrame(animateInitial)}else{setPercent(100);clearTimeout(typingTimer);label.textContent=TYPE;if(easter)beginGlitch();else showHome('normal')}}
  progressFrame=requestAnimationFrame(animateInitial);
- function beginGlitch(){currentMode='glitch';loading.classList.add('glitching');glitchSound();setTimeout(()=>{label.textContent='당신은 오래전부터 저희의 가족이었습니다.';loading.classList.remove('glitching');beginSecondLoad()},470)}
- function beginSecondLoad(){currentMode='second';const t0=performance.now();function frame(now){if(currentMode!=='second')return;let elapsed=now-t0;let cycle=(elapsed%1500)/1500;let value=100-10*(cycle<.5?cycle*2:(1-cycle)*2);setPercent(value);if(elapsed<6000)progressFrame=requestAnimationFrame(frame);else endSecondLoad()}progressFrame=requestAnimationFrame(frame)}
- function endSecondLoad(){currentMode='transition';loading.classList.add('dark-cut');setTimeout(()=>{loading.style.display='none';showVerify()},300)}
- function showVerify(){currentMode='verify';verify.style.display='grid';question.textContent='묻겠습니다. 신도가 맞으신가요?';question.classList.remove('flicker');void question.offsetWidth;question.classList.add('flicker');accept.checked=false;verify.classList.remove('fail');const delay=10000;
-  questionTimer=setTimeout(()=>{if(currentMode==='verify')question.textContent='지금 그 분을 의심하시는 건가요?'},delay);
-  failTimer=setTimeout(()=>{if(currentMode!=='verify')return;currentMode='failed';verify.classList.add('fail');question.classList.remove('flicker');question.textContent='자격이 없습니다.';setTimeout(()=>showHome('normal'),1500)},delay+5000);
+ function beginGlitch(){currentMode='glitch';loading.classList.add('glitching');glitchSound();setTimeout(()=>{label.textContent='당신은 오래전부터 저희의 가족이었습니다.'},660);setTimeout(()=>{loading.classList.remove('glitching');beginSecondLoad()},1350)}
+ function beginSecondLoad(){currentMode='second';startFilm();const t0=performance.now();function frame(now){if(currentMode!=='second')return;let elapsed=now-t0;let cycle=(elapsed%1500)/1500;let value=100-10*(cycle<.5?cycle*2:(1-cycle)*2);setPercent(value);if(elapsed<6000)progressFrame=requestAnimationFrame(frame);else endSecondLoad()}progressFrame=requestAnimationFrame(frame)}
+ function endSecondLoad(){stopFilm();currentMode='transition';loading.classList.add('dark-cut');setTimeout(()=>{loading.style.display='none';showVerify()},300)}
+ function showVerify(){currentMode='verify';verify.style.display='grid';question.textContent='묻겠습니다. 신도가 맞으신가요?';accept.checked=false;verify.classList.remove('fail');const delay=10000;
+  questionTimer=setTimeout(()=>{if(currentMode==='verify'){question.textContent='지금 그 분을 의심하시는 건가요?';shutterSound()}},delay);
+  failTimer=setTimeout(()=>{if(currentMode!=='verify')return;currentMode='failed';verify.classList.add('fail');question.textContent='자격이 없습니다.';shutterSound();setTimeout(()=>showHome('normal'),1500)},delay+5000);
  }
- accept.addEventListener('change',()=>{if(!accept.checked||currentMode!=='verify')return;clearTimeout(questionTimer);clearTimeout(failTimer);showHome('easter')});
- function showHome(mode){currentMode='home';clearTimeout(questionTimer);clearTimeout(failTimer);verify.style.display='none';loading.style.display='none';$('normal').style.display=mode==='normal'?'block':'none';$('easter').style.display=mode==='easter'?'block':'none';soundBtn.style.display='none';document.body.style.background=mode==='easter'?'#6200ff':'#fff';document.title='카밀레교 | '+(mode==='easter'?'귀의를 환영합니다':'환영합니다');window.scrollTo(0,0)}
+ accept.addEventListener('change',()=>{if(!accept.checked||currentMode!=='verify')return;clearTimeout(questionTimer);clearTimeout(failTimer);showEasterEntry()});
+ function showEasterEntry(){
+  currentMode='entry';verify.style.display='none';entryLoading.style.display='grid';entryPercent.textContent='00%';
+  const t0=performance.now();
+  function entryFrame(now){if(currentMode!=='entry')return;const fraction=Math.min(1,(now-t0)/1000);entryPercent.textContent=String(Math.floor(fraction*100)).padStart(2,'0')+'%';if(fraction<1)requestAnimationFrame(entryFrame);else{entryPercent.textContent='100%';showHome('easter')}}
+  requestAnimationFrame(entryFrame)
+ }
+ function showHome(mode){currentMode='home';clearTimeout(questionTimer);clearTimeout(failTimer);verify.style.display='none';loading.style.display='none';entryLoading.style.display='none';stopFilm();$('normal').style.display=mode==='normal'?'block':'none';$('easter').style.display=mode==='easter'?'block':'none';soundBtn.style.display='none';document.body.style.background=mode==='easter'?'#6200ff':'#fff';document.title='카밀레교 | '+(mode==='easter'?'귀의를 환영합니다':'환영합니다');window.scrollTo(0,0)}
 })();
 </script>
 </body>

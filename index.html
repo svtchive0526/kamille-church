@@ -258,6 +258,29 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
   .card-description {font-size: 17px}
 }
 
+
+/* New family page: matches the supplied normal/easter mobile artwork. */
+.family-body[hidden], #introBody[hidden]{display:none!important}
+.family-welcome{min-height:clamp(168px,36vw,276px);background:var(--detail-card);border-radius:clamp(11px,2.1vw,20px);padding:clamp(22px,5vw,42px);display:flex;justify-content:center;flex-direction:column;gap:clamp(14px,2.9vw,24px)}
+.family-welcome-title{font-size:clamp(18px,3.4vw,29px);line-height:1.3;letter-spacing:-.065em;font-weight:860;color:#2526be;margin:0}
+.family-welcome-text{font-size:clamp(14px,2.55vw,23px);font-weight:500;line-height:1.52;color:#949494;margin:0;white-space:pre-line}
+.family-faq .detail-section-title{margin-bottom:clamp(15px,3vw,27px)}
+.family-questions{display:flex;flex-direction:column;gap:clamp(8px,1.4vw,14px);margin-top:clamp(17px,3.2vw,31px)}
+.family-question{background:var(--detail-card);border-radius:clamp(11px,2.1vw,20px);padding:clamp(22px,5vw,42px);}
+.family-question-title{margin:0 0 clamp(10px,2.1vw,22px);font-size:clamp(18px,3.3vw,29px);line-height:1.3;font-weight:850;letter-spacing:-.065em;color:#41854f;word-break:keep-all}
+.family-question-answer{margin:0;color:#949494;font-size:clamp(14px,2.55vw,22px);font-weight:500;line-height:1.52;white-space:pre-line;word-break:keep-all}
+.detail.easter-detail .family-welcome-title{color:#f4f938}
+.detail.easter-detail .family-welcome-text,.detail.easter-detail .family-question-answer{color:#808080}
+.detail.easter-detail .family-question-title{color:#c184af}
+@media(min-width:1024px){
+ .family-welcome{min-height:270px;padding:clamp(32px,3vw,46px);gap:23px;border-radius:20px}
+ .family-welcome-title{font-size:clamp(22px,1.9vw,30px)}
+ .family-welcome-text{font-size:clamp(17px,1.3vw,21px);line-height:1.62}
+ .family-questions{gap:18px;margin-top:28px}
+ .family-question{padding:clamp(30px,3vw,46px);border-radius:20px}
+ .family-question-title{font-size:clamp(22px,1.75vw,28px)}
+ .family-question-answer{font-size:clamp(17px,1.3vw,21px);line-height:1.68}
+}
 </style>
 </head>
 <body>
@@ -274,14 +297,14 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
 <main id="normal" class="home normal screen">
  <h1 class="home-header">카밀레교 사이트 방문을 환영합니다!</h1>
  <div class="cards"><div class="menu-card" role="button" tabindex="0" data-detail="normal" aria-label="카밀레교 소개 보기"><h2 class="card-title">카밀레교</h2><p class="card-description">카밀레교에 대해 궁금한 점이 있으신가요?</p></div>
- <div class="menu-card"><h2 class="card-title">새 가족</h2><p class="card-description">카밀레교의 새 가족이 되고 싶으신가요?</p></div>
+ <div class="menu-card" role="button" tabindex="0" data-detail="normal" data-page="family" aria-label="새 가족 안내 보기"><h2 class="card-title">새 가족</h2><p class="card-description">카밀레교의 새 가족이 되고 싶으신가요?</p></div>
  <div class="menu-card"><h2 class="card-title">로그인</h2><p class="card-description">로그인 후 더 다양한 정보를 만나보세요.</p></div></div>
  <p class="home-footer">카밀레교는 새로운 가족을 기다리고 있습니다.</p>
 </main>
 <main id="easter" class="home easter screen">
  <h1 class="home-header">당신의 귀의를 진심으로 환영합니다.</h1>
  <div class="cards"><div class="menu-card" role="button" tabindex="0" data-detail="easter" aria-label="카밀레교 소개 보기"><h2 class="card-title">카밀레교</h2><p class="card-description">알아야 할 모든 진리가 이곳에 있습니다.</p></div>
- <div class="menu-card"><h2 class="card-title">새 가족</h2><p class="card-description">오래전부터 저희의 소중한 가족이었습니다.</p></div>
+ <div class="menu-card" role="button" tabindex="0" data-detail="easter" data-page="family" aria-label="새 가족 안내 보기"><h2 class="card-title">새 가족</h2><p class="card-description">오래전부터 저희의 소중한 가족이었습니다.</p></div>
  <div class="menu-card"><h2 class="card-title">선서문</h2><p class="card-description">준비된 서약을 기쁜 마음으로 받아주세요.</p></div></div>
  <p class="home-footer">당신을 위한 자리는 이미 마련되어 있습니다.</p>
 </main>
@@ -289,9 +312,9 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  <div class="detail-shell">
   <div class="detail-sticky">
    <nav class="detail-nav" aria-label="상단 탐색"><button class="detail-back" id="detailBack" type="button">← 홈화면으로 돌아가기</button><button class="detail-brand" id="detailBrand" type="button">카밀레교</button></nav>
-   <header class="detail-intro"><p class="detail-eyebrow">카밀레교 안내</p><h1 class="detail-heading">카밀레교</h1><p id="detailSubtitle" class="detail-subheading"></p></header>
+   <header class="detail-intro"><p id="detailEyebrow" class="detail-eyebrow">카밀레교 안내</p><h1 id="detailHeading" class="detail-heading">카밀레교</h1><p id="detailSubtitle" class="detail-subheading"></p></header>
   </div>
-  <div class="detail-body">
+  <div id="introBody" class="detail-body">
    <section class="flux-card" aria-label="카밀레교 소개 문구"><button id="fluxArrow" class="flux-arrow" type="button" aria-label="다음 소개 보기"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M9 24H39M27 12L39 24L27 36"/></svg></button><h2 class="flux-card-title">만물의 본진은 자연, Flux입니다.</h2><p id="fluxDesc" class="flux-desc"></p></section>
    <section class="detail-section"><h2 class="detail-section-title">카밀레교의 3대 소명문</h2><p class="detail-text detail-paragraph">카밀레교는 얼어붙은 영혼에 신의 생명을 불어넣으며,
 태초 섭리(Flux)와 조화를 이루기 위해 거룩한 소명을 품고 나아갑니다.</p>
@@ -300,6 +323,17 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
     <p id="missionOutro" class="mission-outro"></p>
    </section>
    <section class="detail-section"><h2 class="detail-section-title doctrine-head">카밀레교의 교리</h2><p class="detail-text">카밀레교 은총의 세 기둥에 대해 말씀드립니다.</p><p class="detail-text doctrine-pillars">역경과 번성 / Tribulation and Abundance<br>공양과 소생 / Oblation and Quickening<br>인내와 활력 / Endurance and Vigor</p><p class="doctrine-quote">“눈물을 흘리며 씨를 뿌리는 자는 기쁨으로 거두리로다<br>울며 씨를 뿌리러 나가는 자는 반드시 기쁨으로 그 곡식 단을 가지고 돌아오리로다”<span class="doctrine-source">시편 126편 5절~6절</span></p></section>
+  </div>
+  <div id="familyBody" class="detail-body family-body" hidden>
+   <section class="family-welcome" aria-label="새 가족 환영 문구">
+     <h2 id="familyWelcomeTitle" class="family-welcome-title"></h2>
+     <p id="familyWelcomeText" class="family-welcome-text"></p>
+   </section>
+   <section class="detail-section family-faq" aria-labelledby="familyFaqHeading">
+    <h2 id="familyFaqHeading" class="detail-section-title">자주 묻는 질문들</h2>
+    <p id="familyFaqIntro" class="detail-text detail-paragraph"></p>
+    <div id="familyQuestions" class="family-questions"></div>
+   </section>
   </div>
  </div>
 </main>
@@ -498,12 +532,56 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
   normal:'우리는 시대의 징조 속에서 영적 성장을 이루고,\n하나된 공동체로 온전히 개화하고자 합니다.\n마치 짓밟힐수록 향기로워지는 들꽃처럼,\n카밀레교는 인내로 거룩한 구원의 열매를 맺을 것입니다.',
   easter:'우리는 시대의 징조 속에서 영적 성장을 이루고,\n각자의 이름과 형상을 버려 하나의 존재로 개화하고자 합니다.\n마치 짓밟혀야 비로소 향기를 내어주는 들꽃처럼,\n소멸을 두려워하지 않는 인내로 거룩한 구원의 열매를 맺을 것입니다.'
  };
+
+ const familyCopy={
+  normal:{
+   heading:'카밀레교의 새 가족',subtitle:'카밀레교의 새 가족이 되고 싶으신가요?',
+   welcomeTitle:'언제나 여러분을 환영합니다.',
+   welcomeText:'아무 걱정하지 않으셔도 됩니다.\n저희는 언제나 여러분을 맞이할 준비가 되어 있습니다.',
+   intro:'처음 오시는 분들이 가장 많이 물으시는 질문을 모았습니다.\n걱정하지 마세요, 여러분의 질문에 답하기 위해 저희가 있으니까요.',
+   questions:[
+    ['기존 교회와 무엇이 다른가요?','카밀레교는 구원을 계율 준수의 대가로 보지 않습니다.\n진정한 구원은 생동, 곧 새로운 흐름입니다.\n낯설게 느껴지신다면 오래 얼어 있었기 때문일지도 모릅니다.\n봄은 언제나 처음엔 낯선 법이니까요.'],
+    ['성소 생활은 어떻게 이루어지나요?','성소에서의 하루는 섭리의 반복되는 흐름에 의해 이어집니다.\n꾸준한 기도, 신앙 활동, 진실된 고해성사로 이루어져 있으며,\n자신을 비우는 생활 속에서 진정한 하나 됨을 경험합니다.\n어려움 속에서도 성도님은 혼자가 아닙니다.'],
+    ['입교 절차는 어떻게 되나요?','로그인 후 ‘신도 등록’을 완료하시면 안내 메일을 보내드립니다.\n입교는 원칙적으로 본인이 직접 방문 후 절차를 밟을 수 있습니다.\n방문 시에는 개인 소지품을 지참하지 않으셔도 괜찮습니다.\n필요한 것은 저희가 전부 준비해 드립니다.']
+   ]
+  },
+  easter:{
+   heading:'카밀레교의 가족',subtitle:'저희의 가족으로 돌아오시는 길을 안내드리겠습니다.',
+   welcomeTitle:'언제나 당신을 기다리고 있었습니다.',
+   welcomeText:'아무것도 걱정하지 않으셔도 됩니다.\n저희는 오래전부터 당신을 맞이할 준비가 되어 있었습니다.',
+   intro:'처음 오시는 분들이 가장 많이 물으시는 질문을 모았습니다.\n걱정하지 마세요, 무엇을 궁금해하시는지 이미 알고 있으니까요.',
+   questions:[
+    ['기존 교회와 무엇이 다른가요?','카밀레교는 구원을 계율 준수의 대가로 보지 않습니다.\n진정한 구원은 생동, 이전을 버리고 맞이하는 새로운 흐름입니다.\n낯설게 느껴지신다면 지난 계절에 머물고 있기 때문이죠.\n걱정하지 마세요, 봄이 오면 겨울은 사라지는 법이니까요.'],
+    ['성소 생활은 어떻게 이루어지나요?','성소에서의 하루는 섭리가 정해주신 흐름에 따라 이어집니다.\n꾸준한 기도, 신앙 활동, 진실된 고해성사로 이루어져 있으며,\n비워내는 생활 속에서 구별되지 않는 하나 됨을 경험합니다.\n걱정하지 마세요, 성도님은 결코 혼자 계실 수 없으니까요.'],
+    ['저는 원래 카밀레교의 가족이었나요?','성도님께서는 오래전부터 저희의 소중한 가족이셨습니다.\n‘신도 등록’을 완료하시면 돌아오실 절차를 안내해 드립니다.\n삶에서 사용하시던 개인 소지품을 가져오지 않으셔도 됩니다.\n돌아오실 날을 위해 모든 준비를 마쳐두었으니까요.']
+   ]
+  }
+ };
  const detail=$('detail'),detailSubtitle=$('detailSubtitle'),fluxDesc=$('fluxDesc'),fluxArrow=$('fluxArrow'),missionSlide=$('missionSlide'),missionOutro=$('missionOutro'),missionTabs=[...$('missionTabs').querySelectorAll('button')];
- let detailMode='normal',introIndex=0,missionIndex=0,leakTimer=null,leakRestore=null;
+ let detailMode='normal',detailPage='intro',introIndex=0,missionIndex=0,leakTimer=null,leakRestore=null;
  let normalFlashTimer=null,normalFlashRestore=null,normalFlashActive=false;
  function paintDetail(mode){
   detail.classList.toggle('easter-detail',mode==='easter');
-  detailSubtitle.textContent=mode==='easter'?'알아야 할 모든 진리가 이 곳에 존재합니다.':'카밀레교에 대해 간략히 알려드리겠습니다.';
+  const isFamily=detailPage==='family';
+  $('introBody').hidden=isFamily;
+  $('familyBody').hidden=!isFamily;
+  $('detailEyebrow').textContent=isFamily?'새 가족이 되어보세요':'카밀레교 안내';
+  $('detailHeading').textContent=isFamily?familyCopy[mode].heading:'카밀레교';
+  detailSubtitle.textContent=isFamily?familyCopy[mode].subtitle:(mode==='easter'?'알아야 할 모든 진리가 이 곳에 존재합니다.':'카밀레교에 대해 간략히 알려드리겠습니다.');
+  if(isFamily){
+   const data=familyCopy[mode];
+   $('familyWelcomeTitle').textContent=data.welcomeTitle;
+   $('familyWelcomeText').textContent=data.welcomeText;
+   $('familyFaqIntro').textContent=data.intro;
+   const questions=$('familyQuestions');
+   questions.replaceChildren(...data.questions.map(([title,answer])=>{
+    const section=document.createElement('section');section.className='family-question';
+    const heading=document.createElement('h3');heading.className='family-question-title';heading.textContent=title;
+    const paragraph=document.createElement('p');paragraph.className='family-question-answer';paragraph.textContent=answer;
+    section.append(heading,paragraph);return section;
+   }));
+   return;
+  }
   fluxDesc.textContent=descriptions[mode][introIndex];
   missionSlide.textContent=missions[missionIndex];
   missionOutro.textContent=outros[mode];
@@ -571,17 +649,17 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
    },350);
   },10000+Math.random()*5000);
  }
- function openDetail(mode){
-  clearLeak();clearNormalFlash();currentMode='detail';detailMode=mode;introIndex=0;missionIndex=0;
+ function openDetail(mode,page='intro'){
+  clearLeak();clearNormalFlash();currentMode='detail';detailMode=mode;detailPage=page;introIndex=0;missionIndex=0;
   $('normal').style.display='none';$('easter').style.display='none';
   detail.style.display='block';paintDetail(mode);
   document.body.style.background=mode==='easter'?'#000':'#fff';
-  document.title='카밀레교 | 안내';window.scrollTo(0,0);scheduleLeak();if(mode==='normal')scheduleNormalFlash();
+  document.title='카밀레교 | '+(page==='family'?'새 가족':'안내');window.scrollTo(0,0);scheduleLeak();if(mode==='normal')scheduleNormalFlash();
  }
  function backFromDetail(){clearLeak();clearNormalFlash();detail.style.display='none';showHome(detailMode)}
  document.querySelectorAll('[data-detail]').forEach(node=>{
-  node.addEventListener('click',()=>openDetail(node.dataset.detail));
-  node.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();openDetail(node.dataset.detail)}});
+  node.addEventListener('click',()=>openDetail(node.dataset.detail,node.dataset.page||'intro'));
+  node.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();openDetail(node.dataset.detail,node.dataset.page||'intro')}});
  });
  $('detailBack').addEventListener('click',backFromDetail);
  $('detailBrand').addEventListener('click',backFromDetail);

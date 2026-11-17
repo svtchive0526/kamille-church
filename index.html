@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101010">
+<title>카밀레교 | 환영합니다</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<style>
+:root{font-family:Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',sans-serif;font-synthesis:none}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;}body{background:#101010;color:#fff;letter-spacing:-.055em}button{font:inherit}
+.screen{min-height:100svh;width:100%;}
+.loading{background:#101010;color:#fafafa;position:fixed;inset:0;display:grid;place-items:center;overflow:hidden;z-index:10}
+.loader-content{width:100%;padding:0 22px;text-align:center;position:relative;transform:translateY(-1%)}
+.loader-label{font-size:clamp(18px,4.8vw,39px);font-weight:750;line-height:1.35;min-height:1.4em;white-space:nowrap;letter-spacing:-.055em}
+.loader-percent{font-size:clamp(22px,5vw,42px);font-weight:440;letter-spacing:-.055em;margin-top:26px;font-variant-numeric:tabular-nums}
+.loader-label.blink{animation:blinkText .34s steps(1,end) 6}
+@keyframes blinkText{0%,49%{opacity:1}50%,100%{opacity:.06}}
+@media(max-width:520px){.loader-label{font-size:clamp(15px,4.25vw,24px)}.loader-percent{font-size:clamp(20px,5vw,28px);margin-top:17px}}
+/* Dark, low-flash analog interference */
+.glitch-overlay{position:absolute;inset:0;pointer-events:none;opacity:0;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(90,79,109,.10) 4px,transparent 5px),linear-gradient(90deg,transparent 15%,rgba(76,52,94,.13) 50%,transparent 85%);mix-blend-mode:screen}
+.loading.glitching .glitch-overlay{opacity:.85;animation:glitchMove .12s steps(2) infinite}
+.loading.glitching .loader-content{animation:shake .1s steps(2) infinite;text-shadow:2px 0 #44145c,-2px 0 #113845}
+@keyframes glitchMove{0%{transform:translate(0)}50%{transform:translate(12px, -5px)}100%{transform:translate(-7px,6px)}}
+@keyframes shake{0%{transform:translate(-3px,1px)}50%{transform:translate(3px,-2px)}100%{transform:translate(0,1px)}}
+.loading.dark-cut .loader-content{opacity:0}
+.sound-toggle{position:fixed;top:max(18px,env(safe-area-inset-top));right:18px;z-index:25;border:1px solid #555;color:#bbb;background:#202020;border-radius:18px;padding:7px 11px;font-size:11px;letter-spacing:0;cursor:pointer}
+.verify{display:none;position:fixed;inset:0;background:#101010;z-index:11;color:#fff;place-items:center;padding:20px;text-align:center}
+.verify-inner{transform:translateY(-1%);width:100%;}
+.verify-question{font-size:clamp(18px,4.7vw,40px);font-weight:760;line-height:1.4;letter-spacing:-.06em;margin:0 0 26px}
+.verify-question.flicker{animation:blinkText .33s steps(1,end) 6}
+.verify-check{display:inline-flex;align-items:center;gap:16px;font-size:clamp(18px,4.7vw,40px);font-weight:540;cursor:pointer;letter-spacing:-.06em}
+.verify-check input{appearance:none;-webkit-appearance:none;flex:none;width:clamp(24px,6vw,51px);height:clamp(24px,6vw,51px);border:3px solid white;border-radius:8px;background:transparent;position:relative;cursor:pointer}
+.verify-check input:checked::after{content:'✓';font-size:clamp(19px,4.6vw,39px);position:absolute;inset:0;display:grid;place-items:center;font-weight:700}
+.verify-check:focus-within{outline:2px solid #aaa;outline-offset:6px;border-radius:5px}
+.verify.fail .verify-check{display:none}
+.home{display:none;min-height:100svh;padding-bottom:clamp(90px,24vw,260px);}
+.home.normal{background:linear-gradient(#fafafa 0,#fff 24%,#fff 100%);color:#000}
+.home.easter{background:#6200ff;color:#91ff00}
+.home-header{margin:0;padding-top:clamp(45px,11.45vw,110px);font-size:clamp(19px,4.05vw,39px);font-weight:850;line-height:1.3;text-align:center;letter-spacing:-.065em;white-space:nowrap}
+.home.normal .home-header{color:#0648ff}.home.easter .home-header{color:#b0a1ff}
+.cards{width:82.25%;max-width:780px;margin:clamp(115px,22.2vw,210px) auto 0;display:flex;flex-direction:column;gap:clamp(12px,2.75vw,28px)}
+.menu-card{width:100%;min-height:clamp(130px,31.35vw,340px);border-radius:clamp(8px,1.7vw,18px);display:flex;flex-direction:column;justify-content:center;padding:clamp(22px,6.75vw,72px);text-align:left;}
+.home.normal .menu-card{background:#ececec;}.home.easter .menu-card{background:rgba(54,8,213,.30);border:2px solid #91ff00}
+.card-title{font-size:clamp(27px,6.6vw,66px);font-weight:900;letter-spacing:-.075em;line-height:1.15;margin:0 0 8px}
+.card-description{font-size:clamp(14px,3.5vw,34px);font-weight:750;letter-spacing:-.07em;line-height:1.25;margin:0;white-space:nowrap}
+.home.normal .card-description{color:#777}.home.easter .card-description{color:#33a345}
+.home-footer{text-align:center;margin:clamp(35px,8.8vw,90px) auto 0;font-size:clamp(14px,3.25vw,32px);font-weight:500;letter-spacing:-.065em;white-space:nowrap}
+.home.normal .home-footer{color:#777}.home.easter .home-footer{color:#33a345}
+@media (min-width:947px){.home-header{padding-top:85px}.cards{margin-top:180px}.menu-card{min-height:300px}.home{padding-bottom:150px}}
+@media (max-width:450px){.home-header{font-size:4.05vw}.menu-card{padding:6.7vw}.card-title{font-size:6.6vw;margin-bottom:4px}.card-description{font-size:3.5vw}.home-footer{font-size:3.25vw}}
+@media (prefers-reduced-motion:reduce){.loader-label.blink,.verify-question.flicker{animation:none}}
+</style>
+</head>
+<body>
+<button id="soundBtn" class="sound-toggle" type="button" aria-pressed="false">소리 켜기</button>
+<section id="loading" class="loading screen" aria-live="off">
+ <div class="glitch-overlay"></div>
+ <div class="loader-content"><div id="loadText" class="loader-label">접속을 위해 대기중입니다...</div><div id="percent" class="loader-percent">00%</div></div>
+</section>
+<section id="verify" class="verify screen">
+ <div class="verify-inner"><h1 class="verify-question flicker" id="verifyQuestion">묻겠습니다. 신도가 맞으신가요?</h1>
+ <label class="verify-check" id="checkLabel"><input id="accept" type="checkbox"><span>신도가 맞습니다.</span></label></div>
+</section>
+<main id="normal" class="home normal screen">
+ <h1 class="home-header">카밀레교 사이트 방문을 환영합니다!</h1>
+ <div class="cards"><div class="menu-card"><h2 class="card-title">카밀레교</h2><p class="card-description">카밀레교에 대해 궁금한 점이 있으신가요?</p></div>
+ <div class="menu-card"><h2 class="card-title">새 가족</h2><p class="card-description">카밀레교의 새 가족이 되고 싶으신가요?</p></div>
+ <div class="menu-card"><h2 class="card-title">로그인</h2><p class="card-description">로그인 후 더 다양한 정보를 만나보세요.</p></div></div>
+ <p class="home-footer">카밀레교는 새로운 가족을 기다리고 있습니다.</p>
+</main>
+<main id="easter" class="home easter screen">
+ <h1 class="home-header">당신의 귀의를 진심으로 환영합니다.</h1>
+ <div class="cards"><div class="menu-card"><h2 class="card-title">카밀레교</h2><p class="card-description">알아야 할 모든 진리가 이곳에 있습니다.</p></div>
+ <div class="menu-card"><h2 class="card-title">새 가족</h2><p class="card-description">오래전부터 저희의 소중한 가족이었습니다.</p></div>
+ <div class="menu-card"><h2 class="card-title">선서문</h2><p class="card-description">준비된 서약을 기쁜 마음으로 받아주세요.</p></div></div>
+ <p class="home-footer">당신을 위한 자리는 이미 마련되어 있습니다.</p>
+</main>
+<script>
+(()=>{
+ 'use strict';
+ const $=id=>document.getElementById(id);
+ const loading=$('loading'),label=$('loadText'),percentage=$('percent'),verify=$('verify'),question=$('verifyQuestion'),accept=$('accept'),soundBtn=$('soundBtn');
+ const params=new URLSearchParams(location.search);
+ // TEST ONLY: ?mode=normal or ?mode=easter. Without mode, each visit is random 30%.
+ const forced=params.get('mode');
+ const easter=forced==='easter'?true:forced==='normal'?false:Math.random()<0.30;
+ let audioCtx=null, soundEnabled=false, typingTimer=null, progressFrame=null, branchTimer=null, questionTimer=null, failTimer=null, currentMode='loading';
+ function unlockAudio(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume();soundEnabled=true;soundBtn.textContent='소리 켜짐';soundBtn.setAttribute('aria-pressed','true')}catch(e){soundBtn.textContent='소리 사용 불가'}}
+ soundBtn.addEventListener('click',unlockAudio);
+ // Web Audio synthesized effects, avoiding external sound files and autoplay errors.
+ function tone(freq=450,duration=.024,volume=.022,type='square'){
+  if(!soundEnabled||!audioCtx)return;
+  try{const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime;o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(volume,t);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+duration+.005)}catch(e){}
+ }
+ function glitchSound(){if(!soundEnabled||!audioCtx)return;for(let i=0;i<11;i++)setTimeout(()=>tone(65+Math.random()*340,.035+Math.random()*.045,.032,'sawtooth'),i*30)}
+ function setPercent(value){percentage.textContent=String(Math.round(value)).padStart(2,'0')+'%'}
+ const TYPE='접속을 위해 대기중입니다...'; let index=0, erasing=false;
+ function typeStep(){if(currentMode!=='loading')return;
+  if(!erasing){index=Math.min(TYPE.length,index+1);label.textContent=TYPE.slice(0,index);if(index>0)tone(290+Math.random()*160,.018,.015);if(index===TYPE.length){erasing=true;typingTimer=setTimeout(typeStep,400);return}}
+  else{index=Math.max(0,index-2);label.textContent=TYPE.slice(0,index);if(index===0)erasing=false}
+  typingTimer=setTimeout(typeStep,erasing?35:75);
+ }
+ label.textContent='';typeStep();
+ const start=performance.now();
+ function animateInitial(now){const progress=Math.min((now-start)/5000,1);setPercent(progress*100);if(progress<1){progressFrame=requestAnimationFrame(animateInitial)}else{setPercent(100);clearTimeout(typingTimer);label.textContent=TYPE;if(easter)beginGlitch();else showHome('normal')}}
+ progressFrame=requestAnimationFrame(animateInitial);
+ function beginGlitch(){currentMode='glitch';loading.classList.add('glitching');glitchSound();setTimeout(()=>{label.textContent='당신은 오래전부터 저희의 가족이었습니다.';loading.classList.remove('glitching');beginSecondLoad()},470)}
+ function beginSecondLoad(){currentMode='second';const t0=performance.now();function frame(now){if(currentMode!=='second')return;let elapsed=now-t0;let cycle=(elapsed%1500)/1500;let value=100-10*(cycle<.5?cycle*2:(1-cycle)*2);setPercent(value);if(elapsed<6000)progressFrame=requestAnimationFrame(frame);else endSecondLoad()}progressFrame=requestAnimationFrame(frame)}
+ function endSecondLoad(){currentMode='transition';loading.classList.add('dark-cut');setTimeout(()=>{loading.style.display='none';showVerify()},300)}
+ function showVerify(){currentMode='verify';verify.style.display='grid';question.textContent='묻겠습니다. 신도가 맞으신가요?';question.classList.remove('flicker');void question.offsetWidth;question.classList.add('flicker');accept.checked=false;verify.classList.remove('fail');const delay=10000;
+  questionTimer=setTimeout(()=>{if(currentMode==='verify')question.textContent='지금 그 분을 의심하시는 건가요?'},delay);
+  failTimer=setTimeout(()=>{if(currentMode!=='verify')return;currentMode='failed';verify.classList.add('fail');question.classList.remove('flicker');question.textContent='자격이 없습니다.';setTimeout(()=>showHome('normal'),1500)},delay+5000);
+ }
+ accept.addEventListener('change',()=>{if(!accept.checked||currentMode!=='verify')return;clearTimeout(questionTimer);clearTimeout(failTimer);showHome('easter')});
+ function showHome(mode){currentMode='home';clearTimeout(questionTimer);clearTimeout(failTimer);verify.style.display='none';loading.style.display='none';$('normal').style.display=mode==='normal'?'block':'none';$('easter').style.display=mode==='easter'?'block':'none';soundBtn.style.display='none';document.body.style.background=mode==='easter'?'#6200ff':'#fff';document.title='카밀레교 | '+(mode==='easter'?'귀의를 환영합니다':'환영합니다');window.scrollTo(0,0)}
+})();
+</script>
+</body>
+</html>

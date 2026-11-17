@@ -281,6 +281,50 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  .family-question-title{font-size:clamp(22px,1.75vw,28px)}
  .family-question-answer{font-size:clamp(17px,1.3vw,21px);line-height:1.68}
 }
+
+/* Login, recovery, oath and cinematic finale */
+#loginBody[hidden],#oathBody[hidden]{display:none!important}
+.auth-fields{display:grid;gap:15px;margin:clamp(27px,4vw,55px) 0 23px}
+.auth-row{display:grid;grid-template-columns:clamp(90px,24%,185px) minmax(0,1fr);align-items:center;gap:12px}
+.auth-row label{font-weight:850;font-size:clamp(16px,3vw,25px);letter-spacing:-.065em;white-space:nowrap}
+.auth-input-wrap{position:relative;min-width:0}
+.auth-input{width:100%;height:clamp(39px,6.5vw,52px);background:#ececec;border:0;border-radius:999px;padding:0 20px;font:inherit;font-size:clamp(14px,2.7vw,21px);font-weight:500;color:#222;letter-spacing:-.045em;outline-offset:3px}
+.auth-input::placeholder{color:#aaa;opacity:1}
+.auth-input.auth-invalid::placeholder{color:#f33}
+.auth-actions{display:flex;gap:8px;margin:clamp(23px,4vw,37px) 0 clamp(45px,8vw,75px)}
+.auth-action{background:#0648ff;color:white;border:0;border-radius:999px;min-height:clamp(40px,6.5vw,53px);font-size:clamp(13px,2.6vw,21px);font-weight:850;letter-spacing:-.07em;cursor:pointer;flex:1;padding:8px 9px;white-space:nowrap}
+.auth-action:focus-visible{outline:3px solid #333;outline-offset:3px}
+.auth-action-wide{flex:2.35}
+.auth-hint{background:#f8f8f8;border-radius:15px;padding:clamp(24px,5vw,39px);color:#929292;font-weight:500;line-height:1.6;white-space:pre-line;font-size:clamp(14px,2.7vw,21px)}
+.auth-hint h2{color:#2526bb;font-size:clamp(19px,3.4vw,29px);font-weight:850;margin:0 0 20px}
+.auth-hint p{margin:0}
+.auth-hint.auth-warning h2{color:#d00000}
+.auth-hint .danger{color:#ef1616;font-weight:750}
+.auth-autocomplete{position:absolute;top:calc(100% + 4px);left:2%;width:96%;border:1px solid #ddd;background:white;border-radius:12px;z-index:12;box-shadow:0 6px 18px #0002;padding:10px 14px;cursor:pointer;font-size:clamp(15px,2.5vw,20px);letter-spacing:0;text-align:left;color:#222}
+.auth-autocomplete[hidden]{display:none!important}
+.oath-callout{background:#102322;border-radius:clamp(11px,2.1vw,20px);min-height:clamp(160px,33vw,270px);padding:clamp(22px,5vw,42px);display:flex;flex-direction:column;justify-content:center;gap:clamp(15px,3vw,25px)}
+.oath-callout h2{font-size:clamp(19px,3.5vw,29px);font-weight:850;color:#f4f938;margin:0}
+.oath-callout p{font-size:clamp(14px,2.6vw,22px);color:#777;line-height:1.6;white-space:pre-line;margin:0}
+.oath-section{margin-top:clamp(40px,6vw,68px)}
+.oath-lines{color:#dedb67;font-size:clamp(14px,2.6vw,22px);line-height:1.58;white-space:pre-line;font-weight:540;display:grid;gap:clamp(15px,2.6vw,25px);margin-top:30px}
+.oath-lines p{margin:0}
+.error-screen{position:fixed;inset:0;z-index:50;display:none;overflow-y:auto;background:#fff;color:#000;padding:clamp(120px,19vh,220px) 0 70px}
+.error-container{width:80%;max-width:760px;margin:0 auto}
+.error-heading{text-align:center;margin:0;font-size:clamp(29px,5.7vw,48px);font-weight:900;letter-spacing:-.075em;line-height:1.2}
+.error-subheading{text-align:center;color:#929292;font-size:clamp(16px,3.25vw,28px);font-weight:750;margin:15px 0 clamp(50px,10vw,85px)}
+.error-card{border-radius:15px;background:#f8f8f8;padding:clamp(26px,5.2vw,42px);min-height:230px}
+.error-card-title{font-size:clamp(20px,3.5vw,29px);color:#2621c2;font-weight:850;margin:0 0 clamp(19px,3.6vw,31px)}
+.error-typing{font-size:clamp(15px,2.8vw,22px);color:#929292;line-height:1.65;white-space:pre-line;letter-spacing:-.05em;min-height:5em;margin:0}
+.mail-end{display:none;position:fixed;inset:0;z-index:55;background:#000;align-items:center;justify-content:center;padding:0 9.5%}
+.mail-alert{background:#34575a;border-radius:16px;color:white;width:min(100%,720px);padding:clamp(22px,4.8vw,40px);transform:translateY(115px);opacity:0;transition:transform .65s cubic-bezier(.2,.8,.15,1),opacity .65s}
+.mail-end.arrived .mail-alert{transform:translateY(0);opacity:1}
+.mail-row{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.mail-row h2{font-size:clamp(19px,3.5vw,30px);font-weight:850;margin:0}
+.mail-close{background:none;border:0;color:white;font-size:clamp(15px,2.7vw,22px);cursor:pointer;padding:5px}
+.mail-alert p{font-size:clamp(16px,2.9vw,24px);margin:14px 0 0;letter-spacing:-.04em}
+@media(min-width:1024px){.auth-fields{max-width:760px}.auth-row{grid-template-columns:165px minmax(0,1fr)}.auth-action{font-size:clamp(15px,1.4vw,19px)}.auth-hint{padding:40px}.oath-callout{min-height:265px}.oath-lines{font-size:20px}}
+@media(max-width:520px){.auth-row{grid-template-columns:25% minmax(0,1fr);gap:9px}.auth-row label{font-size:clamp(13px,3.25vw,17px)}.auth-input{padding:0 12px;font-size:clamp(13px,3.1vw,17px)}.auth-actions{gap:5px}.auth-action{font-size:clamp(11px,2.75vw,15px);padding:8px 5px}.auth-hint{padding:25px 20px}.mail-end{padding:0 9.5%}}
+
 </style>
 </head>
 <body>
@@ -298,14 +342,14 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  <h1 class="home-header">카밀레교 사이트 방문을 환영합니다!</h1>
  <div class="cards"><div class="menu-card" role="button" tabindex="0" data-detail="normal" aria-label="카밀레교 소개 보기"><h2 class="card-title">카밀레교</h2><p class="card-description">카밀레교에 대해 궁금한 점이 있으신가요?</p></div>
  <div class="menu-card" role="button" tabindex="0" data-detail="normal" data-page="family" aria-label="새 가족 안내 보기"><h2 class="card-title">새 가족</h2><p class="card-description">카밀레교의 새 가족이 되고 싶으신가요?</p></div>
- <div class="menu-card"><h2 class="card-title">로그인</h2><p class="card-description">로그인 후 더 다양한 정보를 만나보세요.</p></div></div>
+ <div class="menu-card" role="button" tabindex="0" data-detail="normal" data-page="auth" aria-label="로그인 페이지 보기"><h2 class="card-title">로그인</h2><p class="card-description">로그인 후 더 다양한 정보를 만나보세요.</p></div></div>
  <p class="home-footer">카밀레교는 새로운 가족을 기다리고 있습니다.</p>
 </main>
 <main id="easter" class="home easter screen">
  <h1 class="home-header">당신의 귀의를 진심으로 환영합니다.</h1>
  <div class="cards"><div class="menu-card" role="button" tabindex="0" data-detail="easter" aria-label="카밀레교 소개 보기"><h2 class="card-title">카밀레교</h2><p class="card-description">알아야 할 모든 진리가 이곳에 있습니다.</p></div>
  <div class="menu-card" role="button" tabindex="0" data-detail="easter" data-page="family" aria-label="새 가족 안내 보기"><h2 class="card-title">새 가족</h2><p class="card-description">오래전부터 저희의 소중한 가족이었습니다.</p></div>
- <div class="menu-card"><h2 class="card-title">선서문</h2><p class="card-description">준비된 서약을 기쁜 마음으로 받아주세요.</p></div></div>
+ <div class="menu-card" role="button" tabindex="0" data-detail="easter" data-page="oath" aria-label="선서문 보기"><h2 class="card-title">선서문</h2><p class="card-description">준비된 서약을 기쁜 마음으로 받아주세요.</p></div></div>
  <p class="home-footer">당신을 위한 자리는 이미 마련되어 있습니다.</p>
 </main>
 <main id="detail" class="detail" aria-label="카밀레교 상세 소개">
@@ -335,8 +379,58 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
     <div id="familyQuestions" class="family-questions"></div>
    </section>
   </div>
+
+  <div id="loginBody" class="detail-body" hidden>
+    <div id="loginMain">
+     <form id="loginForm" autocomplete="off">
+      <div class="auth-fields">
+       <div class="auth-row"><label for="loginId">아이디</label><div class="auth-input-wrap"><input id="loginId" class="auth-input" placeholder="아이디를 입력해주세요." autocomplete="off" spellcheck="false"><button type="button" class="auth-autocomplete" data-fill="loginId" hidden>bong2bong</button></div></div>
+       <div class="auth-row"><label for="loginPw">비밀번호</label><div class="auth-input-wrap"><input id="loginPw" class="auth-input" type="password" placeholder="비밀번호를 입력해주세요." autocomplete="off"></div></div>
+       <div class="auth-row"><label for="loginCode">인증번호</label><div class="auth-input-wrap"><input id="loginCode" class="auth-input" inputmode="numeric" placeholder="인증번호를 입력해주세요." autocomplete="off"></div></div>
+      </div>
+      <div class="auth-actions"><button id="goRecoverPass" type="button" class="auth-action">아이디/비밀번호 찾기</button><button id="goRecoverCode" type="button" class="auth-action">인증번호 찾기</button><button type="submit" class="auth-action">로그인하기</button></div>
+     </form>
+     <div class="auth-hint"><h2>로그인 시 유의사항</h2><p>인증번호는 메일에서 전달된 번호를 입력해주세요.
+본 사이트는 간편 사이트로, 회원가입 기능을 제공하지 않습니다.
+모든 문의는 본 사이트를 통해 받고 있습니다.</p></div>
+    </div>
+    <div id="recoverPass" hidden>
+     <div class="auth-fields"><div class="auth-row"><label for="remId">기억나는 아이디</label><input id="remId" class="auth-input" placeholder="기억나는 아이디를 입력해주세요."></div><div class="auth-row"><label for="remPw">기억나는 비밀번호</label><input id="remPw" class="auth-input" type="password" placeholder="기억나는 비밀번호를 입력해주세요."></div></div>
+     <div class="auth-actions"><button class="auth-action auth-action-wide" type="button" id="rememberPass">아이디/비밀번호가 기억났어요!</button><button class="auth-action" type="button" id="submitRecoverPass">제출하기</button></div>
+    </div>
+    <div id="recoverCode" hidden>
+     <div class="auth-fields"><div class="auth-row"><label for="codeId">아이디</label><div class="auth-input-wrap"><input id="codeId" class="auth-input" placeholder="아이디를 입력해주세요." autocomplete="off"><button class="auth-autocomplete" data-fill="codeId" type="button" hidden>bong2bong</button></div></div><div class="auth-row"><label for="remCode">기억나는 인증번호</label><input id="remCode" class="auth-input" placeholder="기억나는 인증번호를 입력해주세요." inputmode="numeric"></div></div>
+     <div class="auth-actions"><button id="rememberCode" type="button" class="auth-action auth-action-wide">인증번호가 기억났어요!</button><button id="submitRecoverCode" type="button" class="auth-action">제출하기</button></div>
+     <div class="auth-hint auth-warning" id="codeWarning" hidden><h2>인증번호는 찾을 수 없습니다.</h2><p>신도님들께 모두 공통적으로 안내드린 사항입니다.
+인증번호는 최초 1회 가입을 통해 발급 시 메일로 안내드립니다.
+<span class="danger">재발급은 교회 방문을 통해서만 가능하다고 안내드렸습니다.
+당신은 카밀레교의 신도가 아닙니다.</span></p></div>
+    </div>
+  </div>
+  <div id="oathBody" class="detail-body" hidden>
+   <section class="oath-callout"><h2>카밀레교의 선서문</h2><p>카밀레교의 가족이라면 누구나 알고 있습니다.
+카밀레교의 가족이라면 누구나 겸허히 서약합니다.</p></section>
+   <section class="oath-section"><h2 class="detail-section-title">선서문</h2><p class="detail-text">태초의 섭리 아래 바치는 여섯 가지 서약</p>
+    <div class="oath-lines">
+     <p>하나, 우리는 구별된 육신을 잠시 허락받은 존재이므로,
+스스로의 경계를 허물어 태초의 섭리(Flux)로 돌아갈 것을 맹세합니다.</p>
+     <p>하나, 우리는 원래 하나였던 영혼이 다른 이름으로 불리고 있음을 깨닫고,
+이름을 버리는 날 비로소 신의 온전한 사랑에 이를 것을 믿습니다.</p>
+     <p>하나, 우리는 은혜가 머무르는 곳에 영원한 안식이 있음을 믿으며,
+살아 있는 계시 앞에서 어제의 진리를 기꺼이 부정할 것을 맹세합니다.</p>
+     <p>하나, 우리는 곧게 뻗은 생명의 흐름을 거스르지 않으며,
+바친 모든 것이 사라지는 것이 아니라 본래의 자리로 돌아감을 믿습니다.</p>
+     <p>하나, 우리는 소멸하는 것과 태어나는 것이 서로 다르지 않음을 깨닫고,
+탈락한 자의 빈자리에 새로운 섭리가 깃듦을 받아들입니다.</p>
+     <p>하나, 우리는 멸하지 않는 영혼이란 끝내 남겨지지 않는 영혼임을 믿으며,
+마지막 하나가 멸하는 날 하나 되는 구원의 완성을 맞이할 것을 맹세합니다.</p>
+    </div>
+   </section>
+  </div>
  </div>
 </main>
+<section id="errorScreen" class="error-screen" aria-live="polite"><div class="error-container"><h1 class="error-heading">페이지를 읽을 수 없습니다.</h1><p class="error-subheading">시간이 지난 뒤 다시 시도해주세요.</p><div class="error-card"><h2 class="error-card-title">오류에 대해 안내드립니다.</h2><p class="error-typing" id="errorTyping"></p></div></div></section>
+<section id="mailEnd" class="mail-end"><div class="mail-alert"><div class="mail-row"><h2>메일이 도착했어요!</h2><button id="mailClose" class="mail-close" type="button">닫기</button></div><p>Next Stop... 2026.11.23.</p></div></section>
 <script>
 (()=>{
  'use strict';
@@ -557,17 +651,113 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
    ]
   }
  };
+
+ // The 90-second window begins at entry, not during intro loading. One window per visit.
+ const VISIT_MS=90000, TICK_START_MS=50000;
+ let visitStarted=0,visitFrame=null,visitTickMark=-1,endingStarted=false;
+ let recoveryTimer=null,errorTimer=null,mailTimer=null,loginView='main';
+ function clockTickDeadline(level){
+  if(!soundEnabled||!audioCtx)return;
+  // The same light bell-like tick, gradually louder between 50 and 90 seconds.
+  const loud=.003+Math.min(1,Math.max(0,level))*.047;
+  noiseBurst(.015,loud*.55,2100);
+  tone(1080,.20,loud,'sine');
+  tone(1620,.12,loud*.2,'sine');
+ }
+ function warningBeep(){tone(370,.95,.075,'sine');tone(185,.85,.012,'sine')}
+ function stopVisit(){if(visitFrame!==null)cancelAnimationFrame(visitFrame);visitFrame=null;visitTickMark=-1}
+ function startVisit(reset=false){
+  if(endingStarted)return;
+  if(reset||!visitStarted){visitStarted=performance.now();visitTickMark=-1}
+  if(visitFrame!==null)return;
+  function monitor(now){
+   if(endingStarted)return;
+   const elapsed=now-visitStarted;
+   if(elapsed>=VISIT_MS){stopVisit();warningBeep();showError();return}
+   if(elapsed>=TICK_START_MS){const beat=Math.floor(elapsed/1000);if(beat!==visitTickMark){visitTickMark=beat;clockTickDeadline((elapsed-TICK_START_MS)/(VISIT_MS-TICK_START_MS))}}
+   visitFrame=requestAnimationFrame(monitor);
+  }
+  visitFrame=requestAnimationFrame(monitor);
+ }
+ const ERROR_PREFIX='페이지가 갑자기 다운되었을 경우, 다음을 따라주세요.\n카밀레교 사이트는 기본적으로 두 가지로 제공되고 있습니다.\n등록된 신도일 경우 신도 전용 홈페';
+ function showError(){
+  if(endingStarted)return;
+  endingStarted=true;stopVisit();clearNormalFlash();clearLeak();clearTimeout(recoveryTimer);clearTimeout(errorTimer);clearTimeout(mailTimer);
+  stopClock();stopFilm();stopBlackouts();stopTvSnow();
+  currentMode='error';$('normal').style.display='none';$('easter').style.display='none';detail.style.display='none';$('verify').style.display='none';$('entryLoading').style.display='none';$('loading').style.display='none';soundBtn.style.display='none';
+  $('errorScreen').style.display='block';$('errorTyping').textContent='';document.body.style.background='#fff';window.scrollTo(0,0);
+  // Character-by-character typing, ending immediately after the syllable 페 at 13 seconds.
+  const begin=performance.now();let printed=0;
+  function step(now){if(currentMode!=='error')return;const count=Math.min(ERROR_PREFIX.length,Math.floor((now-begin)/13000*ERROR_PREFIX.length));
+   if(count>printed){$('errorTyping').textContent=ERROR_PREFIX.slice(0,count);printed=count;noiseBurst(.015,.006,560)}
+   if(now-begin>=13000){$('errorTyping').textContent=ERROR_PREFIX;mailTimer=setTimeout(showMail,60);return}
+   errorTimer=requestAnimationFrame(step);
+  }
+  errorTimer=requestAnimationFrame(step);
+ }
+ function mailSound(){tone(490,.22,.035,'sine');setTimeout(()=>tone(720,.4,.038,'sine'),160)}
+ function showMail(){
+  currentMode='mail';$('errorScreen').style.display='none';document.body.style.background='#000';$('mailEnd').style.display='flex';
+  mailTimer=setTimeout(()=>{$('mailEnd').classList.add('arrived');mailSound()},380);
+ }
+ $('mailClose').addEventListener('click',()=>{$('mailEnd').classList.remove('arrived');$('mailEnd').style.display='none';currentMode='closed';document.body.style.background='#000'});
+ function setLoginView(view){
+  loginView=view;clearTimeout(recoveryTimer);
+  $('loginMain').hidden=view!=='main';$('recoverPass').hidden=view!=='password';$('recoverCode').hidden=view!=='code';
+  $('codeWarning').hidden=true;
+  const meta={main:['카밀레교 로그인','로그인 후 더 다양한 정보를 만나보세요.'],password:['아이디/비밀번호 찾기','아이디/비밀번호가 기억나지 않나요?'],code:['인증번호 찾기','인증번호를 재발급할까요?']}[view];
+  $('detailHeading').textContent=meta[0];detailSubtitle.textContent=meta[1];
+  if(view==='password') recoveryTimer=setTimeout(()=>{if(currentMode==='detail'&&detailMode==='normal'&&detailPage==='auth'&&loginView==='password')showError()},5000);
+ }
+ function setInvalid(input,invalid){
+  if(invalid){input.value='';input.placeholder='다시 입력해주세요.';input.classList.add('auth-invalid')}
+  else input.classList.remove('auth-invalid');
+ }
+ ['loginId','codeId'].forEach(id=>{
+  const field=$(id),suggestion=field.parentElement.querySelector('.auth-autocomplete');
+  function update(){suggestion.hidden=field.value.toLowerCase()==='bong2bong'||(field.value.length>0&&!('bong2bong'.startsWith(field.value.toLowerCase())))}
+  field.addEventListener('focus',update);field.addEventListener('input',()=>{setInvalid(field,false);update()});field.addEventListener('blur',()=>setTimeout(()=>suggestion.hidden=true,140));
+  suggestion.addEventListener('mousedown',e=>e.preventDefault());
+  suggestion.addEventListener('click',()=>{field.value='bong2bong';suggestion.hidden=true;field.dispatchEvent(new Event('input'));field.focus()});
+ });
+ ['loginPw','loginCode'].forEach(id=>$(id).addEventListener('input',()=>setInvalid($(id),false)));
+ $('goRecoverPass').addEventListener('click',()=>{setLoginView('password');window.scrollTo(0,0)});
+ $('goRecoverCode').addEventListener('click',()=>{setLoginView('code');window.scrollTo(0,0)});
+ $('rememberPass').addEventListener('click',()=>setLoginView('main'));
+ $('rememberCode').addEventListener('click',()=>setLoginView('main'));
+ $('submitRecoverPass').addEventListener('click',()=>{ /* this deliberately nonfunctional flow times out after five seconds */ });
+ $('submitRecoverCode').addEventListener('click',()=>{
+  if(!$('codeId').value.trim()||!$('remCode').value.trim())return;
+  $('codeWarning').hidden=false;
+  clearTimeout(recoveryTimer);recoveryTimer=setTimeout(showError,2000);
+ });
+ $('loginForm').addEventListener('submit',e=>{
+  e.preventDefault();if(endingStarted)return;
+  const idOk=$('loginId').value.trim()==='bong2bong',pwOk=$('loginPw').value==='bongbong526**',codeOk=$('loginCode').value.trim()==='0526';
+  if(!idOk)setInvalid($('loginId'),true);
+  if(!pwOk)setInvalid($('loginPw'),true);
+  if(!codeOk)setInvalid($('loginCode'),true);
+  if(!idOk||!pwOk||!codeOk)return;
+  clearLeak();clearNormalFlash();detail.style.display='none';showHome('easter',true);
+ });
+
  const detail=$('detail'),detailSubtitle=$('detailSubtitle'),fluxDesc=$('fluxDesc'),fluxArrow=$('fluxArrow'),missionSlide=$('missionSlide'),missionOutro=$('missionOutro'),missionTabs=[...$('missionTabs').querySelectorAll('button')];
  let detailMode='normal',detailPage='intro',introIndex=0,missionIndex=0,leakTimer=null,leakRestore=null;
  let normalFlashTimer=null,normalFlashRestore=null,normalFlashActive=false;
  function paintDetail(mode){
   detail.classList.toggle('easter-detail',mode==='easter');
   const isFamily=detailPage==='family';
-  $('introBody').hidden=isFamily;
+  const special=detailPage==='auth'||detailPage==='oath';
+  const showOath=special&&mode==='easter',showLogin=special&&mode==='normal';
+  $('introBody').hidden=isFamily||special;
   $('familyBody').hidden=!isFamily;
-  $('detailEyebrow').textContent=isFamily?'새 가족이 되어보세요':'카밀레교 안내';
-  $('detailHeading').textContent=isFamily?familyCopy[mode].heading:'카밀레교';
-  detailSubtitle.textContent=isFamily?familyCopy[mode].subtitle:(mode==='easter'?'알아야 할 모든 진리가 이 곳에 존재합니다.':'카밀레교에 대해 간략히 알려드리겠습니다.');
+  $('loginBody').hidden=!showLogin;
+  $('oathBody').hidden=!showOath;
+  $('detailEyebrow').textContent=isFamily?'새 가족이 되어보세요':special?(showOath?'카밀레교의 선서':'로그인'):'카밀레교 안내';
+  $('detailHeading').textContent=isFamily?familyCopy[mode].heading:showOath?'선서문':showLogin?'카밀레교 로그인':'카밀레교';
+  detailSubtitle.textContent=isFamily?familyCopy[mode].subtitle:showOath?'준비된 서약을 기쁜 마음으로 받아주세요.':showLogin?'로그인 후 더 다양한 정보를 만나보세요.':(mode==='easter'?'알아야 할 모든 진리가 이 곳에 존재합니다.':'카밀레교에 대해 간략히 알려드리겠습니다.');
+  if(showLogin){const view=loginView;const meta={password:['아이디/비밀번호 찾기','아이디/비밀번호가 기억나지 않나요?'],code:['인증번호 찾기','인증번호를 재발급할까요?']}[view];if(meta){$('detailHeading').textContent=meta[0];detailSubtitle.textContent=meta[1]}}
+  if(special)return;
   if(isFamily){
    const data=familyCopy[mode];
    $('familyWelcomeTitle').textContent=data.welcomeTitle;
@@ -652,11 +842,12 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  function openDetail(mode,page='intro'){
   clearLeak();clearNormalFlash();currentMode='detail';detailMode=mode;detailPage=page;introIndex=0;missionIndex=0;
   $('normal').style.display='none';$('easter').style.display='none';
+  if(page==='auth')setLoginView('main');
   detail.style.display='block';paintDetail(mode);
   document.body.style.background=mode==='easter'?'#000':'#fff';
   document.title='카밀레교 | '+(page==='family'?'새 가족':'안내');window.scrollTo(0,0);scheduleLeak();if(mode==='normal')scheduleNormalFlash();
  }
- function backFromDetail(){clearLeak();clearNormalFlash();detail.style.display='none';showHome(detailMode)}
+ function backFromDetail(){clearTimeout(recoveryTimer);clearLeak();clearNormalFlash();detail.style.display='none';showHome(detailMode)}
  document.querySelectorAll('[data-detail]').forEach(node=>{
   node.addEventListener('click',()=>openDetail(node.dataset.detail,node.dataset.page||'intro'));
   node.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();openDetail(node.dataset.detail,node.dataset.page||'intro')}});
@@ -666,7 +857,7 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  fluxArrow.addEventListener('click',()=>{introIndex=(introIndex+1)%3;paintDetail(detailMode)});
  missionTabs.forEach((button,i)=>button.addEventListener('click',()=>{missionIndex=i;paintDetail(detailMode)}));
 
- function showHome(mode){clearNormalFlash();currentMode='home';stopTvSnow();stopBlackouts();stopClock();clearTimeout(questionTimer);clearTimeout(failTimer);verify.style.display='none';loading.style.display='none';entryLoading.style.display='none';stopFilm();$('normal').style.display=mode==='normal'?'block':'none';$('easter').style.display=mode==='easter'?'block':'none';soundBtn.style.display='none';document.body.style.background=mode==='easter'?'#6200ff':'#fff';document.title='카밀레교 | '+(mode==='easter'?'귀의를 환영합니다':'환영합니다');window.scrollTo(0,0);if(mode==='normal')scheduleNormalFlash()}
+ function showHome(mode,resetVisit=false){clearNormalFlash();currentMode='home';stopTvSnow();stopBlackouts();stopClock();clearTimeout(questionTimer);clearTimeout(failTimer);verify.style.display='none';loading.style.display='none';entryLoading.style.display='none';stopFilm();$('normal').style.display=mode==='normal'?'block':'none';$('easter').style.display=mode==='easter'?'block':'none';soundBtn.style.display='none';document.body.style.background=mode==='easter'?'#6200ff':'#fff';document.title='카밀레교 | '+(mode==='easter'?'귀의를 환영합니다':'환영합니다');window.scrollTo(0,0);if(mode==='normal')scheduleNormalFlash();startVisit(resetVisit)}
 })();
 </script>
 </body>

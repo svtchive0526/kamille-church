@@ -135,9 +135,9 @@
  function beginGlitch(){currentMode='glitch';loading.classList.add('glitching');glitchSound();setTimeout(()=>{label.textContent='당신은 오래전부터 저희의 가족이었습니다.'},660);setTimeout(()=>{loading.classList.remove('glitching');beginSecondLoad()},1350)}
  function beginSecondLoad(){currentMode='second';startFilm();const t0=performance.now();function frame(now){if(currentMode!=='second')return;let elapsed=now-t0;let cycle=(elapsed%1500)/1500;let value=100-10*(cycle<.5?cycle*2:(1-cycle)*2);setPercent(value);if(elapsed<6000)progressFrame=requestAnimationFrame(frame);else endSecondLoad()}progressFrame=requestAnimationFrame(frame)}
  function endSecondLoad(){stopFilm();currentMode='transition';loading.classList.add('dark-cut');setTimeout(()=>{loading.style.display='none';showVerify()},300)}
- function showVerify(){currentMode='verify';verify.style.display='grid';question.textContent='묻겠습니다. 신도가 맞으신가요?';accept.checked=false;verify.classList.remove('fail');const delay=10000;
+ function showVerify(){currentMode='verify';verify.style.display='grid';question.textContent='묻겠습니다. 신도가 맞으신가요?';accept.checked=false;verify.classList.remove('fail');const delay=2500;
   questionTimer=setTimeout(()=>{if(currentMode==='verify'){question.textContent='지금 그 분을 의심하시는 건가요?';shutterSound()}},delay);
-  failTimer=setTimeout(()=>{if(currentMode!=='verify')return;currentMode='failed';verify.classList.add('fail');question.textContent='자격이 없습니다.';shutterSound();setTimeout(()=>showHome('normal'),1500)},delay+5000);
+  failTimer=setTimeout(()=>{if(currentMode!=='verify')return;currentMode='failed';verify.classList.add('fail');question.textContent='자격이 없습니다.';shutterSound();setTimeout(()=>showHome('normal'),1500)},delay+2500);
  }
  accept.addEventListener('change',()=>{if(!accept.checked||currentMode!=='verify')return;clearTimeout(questionTimer);clearTimeout(failTimer);showEasterEntry()});
  function showEasterEntry(){

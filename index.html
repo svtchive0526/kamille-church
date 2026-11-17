@@ -553,7 +553,7 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
       scheduleNormalFlash();
     }
    },2000);
-  },20000);
+  },15000);
  }
  function clearLeak(){clearTimeout(leakTimer);clearTimeout(leakRestore);leakTimer=null;leakRestore=null;detail.classList.remove('glitch-leak')}
  function scheduleLeak(){

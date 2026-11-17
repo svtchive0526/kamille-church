@@ -38,11 +38,12 @@
 .loading.dark-cut .loader-content{opacity:0}
 /* Deliberate one-second Easter entry handshake */
 .entry-loading{display:none;position:fixed;inset:0;z-index:12;place-items:center;background:#101010;color:#fff;text-align:center;padding:25px}
-/* The final second of the seven-second entry: low-brightness analog static. */
-.entry-noise{position:absolute;inset:0;pointer-events:none;opacity:0;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(105,68,115,.20) 4px,transparent 6px),repeating-linear-gradient(91deg,rgba(18,22,28,.17) 0 8px,rgba(55,42,64,.15) 8px 13px);mix-blend-mode:screen}
-.entry-loading.noisy .entry-noise{opacity:.86;animation:entryStatic .08s steps(3) infinite}
-.entry-loading.noisy::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 24px,rgba(68,46,74,.26) 25px 30px,transparent 34px 55px);animation:entryStatic .12s steps(2) infinite;opacity:.8}
-.entry-loading.noisy>div:not(.entry-noise){animation:entryWobble .13s steps(2) infinite}
+/* The final second: pale photographic grain, glitch tearing, no full-screen white flash. */
+.entry-noise{position:absolute;inset:0;pointer-events:none;opacity:0;background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(226,225,230,.34) 3px,transparent 5px),repeating-linear-gradient(91deg,rgba(245,245,245,.13) 0 3px,rgba(72,72,82,.25) 3px 10px),linear-gradient(120deg,transparent 20%,rgba(205,206,218,.16) 49%,transparent 79%);mix-blend-mode:screen}
+.entry-loading.noisy .entry-noise{opacity:.98;animation:entryStatic .055s steps(4) infinite}
+.entry-loading.noisy::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 19px,rgba(234,232,238,.23) 20px 23px,rgba(6,6,9,.38) 24px 29px,transparent 30px 61px);animation:entryTear .12s steps(3) infinite;opacity:.86}
+.entry-loading.noisy>div:not(.entry-noise){animation:entryWobble .085s steps(2) infinite;text-shadow:3px 0 rgba(225,225,240,.7),-4px 0 rgba(115,110,125,.8)}
+@keyframes entryTear{0%{clip-path:inset(0 0 0 0);transform:translateX(-8px)}35%{clip-path:inset(18% 0 46% 0);transform:translateX(19px)}70%{clip-path:inset(50% 0 13% 0);transform:translateX(-17px)}100%{clip-path:inset(0 0 0 0);transform:translateX(5px)}}
 @keyframes entryStatic{0%{transform:translate(0,0)}50%{transform:translate(-8px,5px)}100%{transform:translate(6px,-4px)}}
 @keyframes entryWobble{0%{transform:translate(-2px,0)}50%{transform:translate(2px,1px)}100%{transform:translate(0,-1px)}}
 .entry-loading .entry-message{font-size:clamp(18px,4.7vw,38px);font-weight:750}
@@ -109,11 +110,11 @@
  // TEST ONLY: ?mode=normal or ?mode=easter. Without mode, each visit is random 30%.
  const forced=params.get('mode');
  const easter=forced==='easter'?true:forced==='normal'?false:Math.random()<0.30;
- let audioCtx=null, soundEnabled=false, typingTimer=null, progressFrame=null, questionTimer=null, failTimer=null, currentMode='loading', filmInterval=null, filmPulseTimeouts=[];
+ let audioCtx=null, soundEnabled=false, typingTimer=null, progressFrame=null, questionTimer=null, failTimer=null, currentMode='loading', filmInterval=null, filmPulseTimeouts=[], clockTimer=null, clockBeats=0;
  function unlockAudio(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume();soundEnabled=true;soundBtn.textContent='소리 켜짐';soundBtn.setAttribute('aria-pressed','true')}catch(e){soundBtn.textContent='소리 사용 불가'}}
- soundBtn.addEventListener('click',()=>{unlockAudio();if(currentMode==='second')startFilm()});
+ soundBtn.addEventListener('click',()=>{unlockAudio();if(currentMode==='second')startFilm();if(currentMode==='verify')startClock()});
  // Overall output loudness. Preserve the lower pitch and slower effect timing.
- const SOUND_VOLUME_MULTIPLIER=3.0;
+ const SOUND_VOLUME_MULTIPLIER=4.5; // louder than the previous version; individual bursts remain capped
  // Web Audio synthesized effects, avoiding external sound files and autoplay errors.
  function tone(freq=450,duration=.024,volume=.022,type='square'){
   if(!soundEnabled||!audioCtx)return;
@@ -157,6 +158,15 @@
   setTimeout(()=>tone(440,.48,.029,'sine'),165);
   noiseBurst(.10,.028,720);
  }
+ // Dry clock escapement: two short low, filtered wooden/metallic ticks, no pitched oscillator.
+ function clockTick(){
+  if(!soundEnabled||!audioCtx||currentMode!=='verify')return;
+  const tock=(clockBeats++%2)===1;
+  noiseBurst(.019,tock?.053:.066,tock?320:470);
+  noiseBurst(.039,tock?.020:.027,tock?185:270,.026);
+ }
+ function stopClock(){if(clockTimer!==null){clearInterval(clockTimer);clockTimer=null}}
+ function startClock(){stopClock();if(currentMode!=='verify')return;clockTick();clockTimer=setInterval(()=>{if(currentMode==='verify')clockTick();else stopClock()},1000)}
  function shutterSound(){ // low, weighty vintage camera shutter
   mechanicalImpact(0,1,1);
  }
@@ -198,11 +208,11 @@
  function beginGlitch(){currentMode='glitch';loading.classList.add('glitching');glitchSound();setTimeout(()=>{switchHeadline(label,'당신은 오래전부터 저희의 가족이었습니다.')},660);setTimeout(()=>{loading.classList.remove('glitching');beginSecondLoad()},1350)}
  function beginSecondLoad(){currentMode='second';startFilm();const t0=performance.now();function frame(now){if(currentMode!=='second')return;let elapsed=now-t0;let cycle=(elapsed%1500)/1500;let value=100-10*(cycle<.5?cycle*2:(1-cycle)*2);setPercent(value);if(elapsed<6000)progressFrame=requestAnimationFrame(frame);else endSecondLoad()}progressFrame=requestAnimationFrame(frame)}
  function endSecondLoad(){stopFilm();currentMode='transition';loading.classList.add('dark-cut');setTimeout(()=>{loading.style.display='none';showVerify()},300)}
- function showVerify(){currentMode='verify';verify.style.display='grid';question.textContent='묻겠습니다. 신도가 맞으신가요?';accept.checked=false;verify.classList.remove('fail');const delay=5000;
+ function showVerify(){currentMode='verify';verify.style.display='grid';startClock();question.textContent='묻겠습니다. 신도가 맞으신가요?';accept.checked=false;verify.classList.remove('fail');const delay=5000;
   questionTimer=setTimeout(()=>{if(currentMode==='verify'){switchHeadline(question,'지금 그 분을 의심하시는 건가요?');shutterSound()}},delay);
-  failTimer=setTimeout(()=>{if(currentMode!=='verify')return;currentMode='failed';verify.classList.add('fail');switchHeadline(question,'자격이 없습니다.');shutterSound();setTimeout(()=>showHome('normal'),7000)},delay+5000);
+  failTimer=setTimeout(()=>{if(currentMode!=='verify')return;currentMode='failed';stopClock();verify.classList.add('fail');switchHeadline(question,'자격이 없습니다.');shutterSound();setTimeout(()=>showHome('normal'),7000)},delay+5000);
  }
- accept.addEventListener('change',()=>{if(!accept.checked||currentMode!=='verify')return;clearTimeout(questionTimer);clearTimeout(failTimer);showEasterEntry()});
+ accept.addEventListener('change',()=>{if(!accept.checked||currentMode!=='verify')return;clearTimeout(questionTimer);clearTimeout(failTimer);stopClock();showEasterEntry()});
  function showEasterEntry(){
   currentMode='entry';verify.style.display='none';entryLoading.style.display='grid';entryLoading.classList.remove('noisy');
   entryPercent.textContent='00%';switchHeadline(entryMessage,'신도님, 반갑습니다.');
@@ -223,7 +233,7 @@
   }
   requestAnimationFrame(entryFrame);
  }
- function showHome(mode){currentMode='home';clearTimeout(questionTimer);clearTimeout(failTimer);verify.style.display='none';loading.style.display='none';entryLoading.style.display='none';stopFilm();$('normal').style.display=mode==='normal'?'block':'none';$('easter').style.display=mode==='easter'?'block':'none';soundBtn.style.display='none';document.body.style.background=mode==='easter'?'#6200ff':'#fff';document.title='카밀레교 | '+(mode==='easter'?'귀의를 환영합니다':'환영합니다');window.scrollTo(0,0)}
+ function showHome(mode){currentMode='home';stopClock();clearTimeout(questionTimer);clearTimeout(failTimer);verify.style.display='none';loading.style.display='none';entryLoading.style.display='none';stopFilm();$('normal').style.display=mode==='normal'?'block':'none';$('easter').style.display=mode==='easter'?'block':'none';soundBtn.style.display='none';document.body.style.background=mode==='easter'?'#6200ff':'#fff';document.title='카밀레교 | '+(mode==='easter'?'귀의를 환영합니다':'환영합니다');window.scrollTo(0,0)}
 })();
 </script>
 </body>

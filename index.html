@@ -103,6 +103,7 @@
 .detail.easter-detail .flux-desc{color:#808080}
 .flux-arrow{position:absolute;top:clamp(15px,2.5vw,28px);right:clamp(14px,3.2vw,31px);border:0;background:none;color:#b7b7b7;cursor:pointer;font-size:clamp(30px,5.2vw,48px);font-weight:700;line-height:1;padding:0 3px}
 .detail.easter-detail .flux-arrow{color:#78b3b4}
+.flux-arrow svg{display:block;width:clamp(30px,5.2vw,48px);height:clamp(30px,5.2vw,48px);fill:none;stroke:currentColor;stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
 .flux-arrow:hover{opacity:.7}
 .detail-section{margin-top:clamp(34px,7.4vw,76px)}
 .detail-section-title{font-size:clamp(21px,3.65vw,33px);font-weight:850;letter-spacing:-.065em;line-height:1.3;margin:0 0 clamp(15px,3vw,27px)}
@@ -122,6 +123,22 @@
 .doctrine-quote{font-size:clamp(13px,2.35vw,20px);font-weight:700;line-height:1.5;color:#929292;margin-top:clamp(18px,3vw,30px)}
 .doctrine-source{display:block;color:#aaa;font-size:.83em;font-weight:400;margin-top:4px}
 .detail.easter-detail .doctrine-quote{color:#888}
+/* Brief, restrained interference at both edges of the ordinary site's 2-second leak. */
+body.normal-flash-glitch .home,
+body.normal-flash-glitch .detail {animation:normalFlashJolt .28s steps(2,end) both}
+body.normal-flash-glitch .home :is(h1,h2,p),
+body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText .28s steps(2,end) both}
+@keyframes normalFlashJolt {
+  0%,100%{transform:none;filter:none}
+  20%{transform:translateX(3px);filter:contrast(1.3)}
+  52%{transform:translateX(-4px) skewX(.6deg);filter:contrast(1.15)}
+  76%{transform:translateX(2px)}
+}
+@keyframes normalFlashText {
+  0%,100%{text-shadow:none}
+  25%{text-shadow:2px 0 rgba(117,72,190,.65),-2px 0 rgba(33,159,165,.55)}
+  64%{text-shadow:-2px 0 rgba(117,72,190,.5),2px 0 rgba(33,159,165,.5)}
+}
 /* A brief visual leak of the normal site beneath the Easter page */
 .detail.glitch-leak .detail-sticky{background:#fff}
 .detail.glitch-leak{animation:leakShake .43s steps(2,end) both}
@@ -130,6 +147,116 @@
 @keyframes leakText{0%,100%{text-shadow:none}15%{text-shadow:2px 0 #807cff,-2px 0 #00a8ad}34%{text-shadow:-3px 0 #9a77ee,2px 0 #72b3ba}60%{text-shadow:2px 0 #8455ed,-2px 0 #398c91}}
 @media(max-width:520px){.detail-shell{width:82%}.detail-sticky{padding-top:clamp(35px,10vw,55px);padding-bottom:18px}.detail-intro{padding-top:25px}.detail-eyebrow{margin-bottom:9px}.detail-heading{margin-bottom:14px}.detail-body{padding-top:14px}.flux-card{min-height:160px}.detail-section{margin-top:34px}}
 @media(prefers-reduced-motion:reduce){.detail.glitch-leak,.detail.glitch-leak .detail-shell{animation:none}}
+
+
+/* Desktop-only responsive arrangement.
+   All existing mobile/tablet styling, content, interaction and animation remain unchanged. */
+@media (min-width: 1024px) {
+  /* Main landing: three cards in a horizontal editorial row. */
+  .home {
+    min-height: 100svh;
+    padding: 0 clamp(42px, 5.5vw, 110px) 90px;
+    display: none;
+  }
+  .home-header {
+    padding-top: clamp(66px, 7vh, 110px);
+    font-size: clamp(30px, 2.55vw, 43px);
+    line-height: 1.3;
+    white-space: normal;
+  }
+  .cards {
+    width: min(100%, 1440px);
+    max-width: none;
+    margin: clamp(86px, 12vh, 155px) auto 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    gap: clamp(18px, 2vw, 30px);
+  }
+  .menu-card {
+    min-width: 0;
+    min-height: clamp(265px, 24vw, 335px);
+    padding: clamp(29px, 2.65vw, 50px);
+    border-radius: 18px;
+  }
+  .card-title {
+    font-size: clamp(38px, 3.25vw, 55px);
+    margin-bottom: 15px;
+    line-height: 1.16;
+  }
+  .card-description {
+    font-size: clamp(17px, 1.35vw, 23px);
+    line-height: 1.45;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: keep-all;
+  }
+  .home-footer {
+    margin-top: clamp(55px, 8vh, 92px);
+    font-size: clamp(19px, 1.5vw, 25px);
+    white-space: normal;
+    line-height: 1.4;
+  }
+
+  /* Detail page: permanently visible introduction to the left, content to the right. */
+  .detail-shell {
+    width: min( calc(100% - 100px), 1420px );
+    max-width: none;
+    margin: 0 auto;
+    padding-bottom: 120px;
+    display: grid;
+    grid-template-columns: minmax(320px, .82fr) minmax(0, 1.48fr);
+    column-gap: clamp(48px, 5.4vw, 105px);
+    align-items: start;
+  }
+  .detail-sticky {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    padding-top: clamp(56px, 7.2vh, 94px);
+    padding-bottom: 36px;
+  }
+  .detail-nav {
+    height: 40px;
+    padding-bottom: 20px;
+    gap: 14px;
+  }
+  .detail-back, .detail-brand {font-size: clamp(15px, 1.1vw, 19px)}
+  .detail-intro {padding-top: clamp(44px, 5.5vh, 72px)}
+  .detail-eyebrow {font-size: 17px; margin-bottom: 16px}
+  .detail-heading {font-size: clamp(48px, 4.3vw, 70px); margin-bottom: 18px}
+  .detail-subheading {
+    font-size: clamp(19px, 1.65vw, 26px);
+    line-height: 1.48;
+    word-break: keep-all;
+  }
+  .detail-body {padding-top: clamp(56px, 7.2vh, 94px); min-width: 0}
+  .flux-card {
+    min-height: 270px;
+    padding: clamp(32px, 3vw, 46px);
+    border-radius: 20px;
+    gap: 23px;
+  }
+  .flux-card-title {font-size: clamp(22px, 1.9vw, 30px); line-height: 1.35; padding-right: 34px}
+  .flux-desc {font-size: clamp(17px, 1.3vw, 21px); line-height: 1.62; word-break: keep-all}
+  .flux-arrow {font-size: 39px; top: 23px; right: 25px}
+  .flux-arrow svg{width:39px;height:39px}
+  .detail-section {margin-top: clamp(58px, 6vw, 88px)}
+  .detail-section-title {font-size: clamp(27px, 2.1vw, 34px); margin-bottom: 26px}
+  .detail-text, .mission-slide {font-size: clamp(17px, 1.34vw, 21px); line-height: 1.72}
+  .mission-slide {margin-top: 26px; margin-bottom: 14px}
+  .mission-tabs {max-width: 440px; gap: 11px; margin-top: 20px}
+  .mission-tab {height: 9px}
+  .mission-outro {font-size: clamp(18px, 1.35vw, 22px); line-height: 1.65; margin-top: 34px}
+  .doctrine-head {margin-bottom: 22px}
+  .doctrine-pillars {margin-top: 25px}
+  .doctrine-quote {font-size: clamp(16px, 1.18vw, 19px); line-height: 1.65; margin-top: 30px}
+}
+@media (min-width: 1024px) and (max-width: 1200px) {
+  .detail-shell {width: calc(100% - 70px); grid-template-columns: minmax(290px, .78fr) minmax(0, 1.5fr); column-gap: 42px}
+  .menu-card {padding: 27px}
+  .card-description {font-size: 17px}
+}
 
 </style>
 </head>
@@ -165,16 +292,14 @@
    <header class="detail-intro"><p class="detail-eyebrow">카밀레교 안내</p><h1 class="detail-heading">카밀레교</h1><p id="detailSubtitle" class="detail-subheading"></p></header>
   </div>
   <div class="detail-body">
-   <section class="flux-card" aria-label="카밀레교 소개 문구"><button id="fluxArrow" class="flux-arrow" type="button" aria-label="다음 소개 보기">➜</button><h2 class="flux-card-title">만물의 본진은 자연, Flux입니다.</h2><p id="fluxDesc" class="flux-desc"></p></section>
+   <section class="flux-card" aria-label="카밀레교 소개 문구"><button id="fluxArrow" class="flux-arrow" type="button" aria-label="다음 소개 보기"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M9 24H39M27 12L39 24L27 36"/></svg></button><h2 class="flux-card-title">만물의 본진은 자연, Flux입니다.</h2><p id="fluxDesc" class="flux-desc"></p></section>
    <section class="detail-section"><h2 class="detail-section-title">카밀레교의 3대 소명문</h2><p class="detail-text detail-paragraph">카밀레교는 얼어붙은 영혼에 신의 생명을 불어넣으며,
 태초 섭리(Flux)와 조화를 이루기 위해 거룩한 소명을 품고 나아갑니다.</p>
     <div id="missionSlide" class="mission-slide" aria-live="polite"></div>
     <div id="missionTabs" class="mission-tabs" role="group" aria-label="3대 소명문 선택"><button type="button" class="mission-tab" aria-label="첫째 소명문"></button><button type="button" class="mission-tab" aria-label="둘째 소명문"></button><button type="button" class="mission-tab" aria-label="셋째 소명문"></button></div>
     <p id="missionOutro" class="mission-outro"></p>
    </section>
-   <section class="detail-section"><h2 class="detail-section-title doctrine-head">카밀레교의 교리</h2><p class="detail-text">카밀레교 은총의 세 기둥에 대해 말씀드립니다.</p><p class="detail-text doctrine-pillars">역경과 번성 / Tribulation and Abundance
-공양과 소생 / Oblation and Quickening
-인내와 활력 / Endurance and Vigor</p><p class="doctrine-quote">“눈물을 흘리며 씨를 뿌리는 자는 기쁨으로 거두리로다<br>울며 씨를 뿌리러 나가는 자는 반드시 기쁨으로 그 곡식 단을 가지고 돌아오리로다”<span class="doctrine-source">시편 126편 5절~6절</span></p></section>
+   <section class="detail-section"><h2 class="detail-section-title doctrine-head">카밀레교의 교리</h2><p class="detail-text">카밀레교 은총의 세 기둥에 대해 말씀드립니다.</p><p class="detail-text doctrine-pillars">역경과 번성 / Tribulation and Abundance<br>공양과 소생 / Oblation and Quickening<br>인내와 활력 / Endurance and Vigor</p><p class="doctrine-quote">“눈물을 흘리며 씨를 뿌리는 자는 기쁨으로 거두리로다<br>울며 씨를 뿌리러 나가는 자는 반드시 기쁨으로 그 곡식 단을 가지고 돌아오리로다”<span class="doctrine-source">시편 126편 5절~6절</span></p></section>
   </div>
  </div>
 </main>
@@ -383,17 +508,27 @@
   missionSlide.textContent=missions[missionIndex];
   missionOutro.textContent=outros[mode];
   missionTabs.forEach((b,i)=>{b.classList.toggle('active',i===missionIndex);b.setAttribute('aria-pressed',String(i===missionIndex))});
-  fluxArrow.textContent=introIndex===2?'←':'➜';
+  fluxArrow.innerHTML=introIndex===2?'<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M39 24H9M21 12L9 24L21 36"/></svg>':'<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M9 24H39M27 12L39 24L27 36"/></svg>';
   fluxArrow.setAttribute('aria-label',introIndex===2?'첫 번째 소개로 돌아가기':'다음 소개 보기');
  }
+ let normalFlashGlitchTimer=null;
+ function flashTransitionGlitch(){
+  clearTimeout(normalFlashGlitchTimer);
+  document.body.classList.remove('normal-flash-glitch');
+  // Restart the short animation on every actual transition, including the return.
+  void document.body.offsetWidth;
+  document.body.classList.add('normal-flash-glitch');
+  normalFlashGlitchTimer=setTimeout(()=>document.body.classList.remove('normal-flash-glitch'),300);
+ }
  function clearNormalFlash(){
-  clearTimeout(normalFlashTimer);clearTimeout(normalFlashRestore);
-  normalFlashTimer=null;normalFlashRestore=null;
+  clearTimeout(normalFlashTimer);clearTimeout(normalFlashRestore);clearTimeout(normalFlashGlitchTimer);
+  normalFlashTimer=null;normalFlashRestore=null;normalFlashGlitchTimer=null;
+  document.body.classList.remove('normal-flash-glitch');
   if(normalFlashActive){
    normalFlashActive=false;
    if(currentMode==='detail'&&detailMode==='normal')paintDetail('normal');
    if(currentMode==='home'){$('normal').style.display='block';$('easter').style.display='none'}
-   document.body.style.background=currentMode==='detail'?'#fff':'#fff';
+   document.body.style.background='#fff';
   }
  }
  function scheduleNormalFlash(){
@@ -406,12 +541,19 @@
    }else if(currentMode==='home'&&$('normal').style.display==='block'){
     normalFlashActive=true;$('normal').style.display='none';$('easter').style.display='block';document.body.style.background='#6200ff';
    }else return;
+   flashTransitionGlitch();
    normalFlashRestore=setTimeout(()=>{
     if(currentMode==='detail'&&detailMode==='normal'){paintDetail('normal');document.body.style.background='#fff'}
     if(currentMode==='home'&&normalFlashActive){$('easter').style.display='none';$('normal').style.display='block';document.body.style.background='#fff'}
     normalFlashActive=false;
+    flashTransitionGlitch();
+    // Repeat while the visitor remains on the ordinary page.
+    if((currentMode==='home'&&$('normal').style.display==='block') ||
+       (currentMode==='detail'&&detailMode==='normal')){
+      scheduleNormalFlash();
+    }
    },2000);
-  },30000);
+  },20000);
  }
  function clearLeak(){clearTimeout(leakTimer);clearTimeout(leakRestore);leakTimer=null;leakRestore=null;detail.classList.remove('glitch-leak')}
  function scheduleLeak(){

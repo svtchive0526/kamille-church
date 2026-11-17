@@ -315,6 +315,22 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
 .error-card{border-radius:15px;background:#f8f8f8;padding:clamp(26px,5.2vw,42px);min-height:230px}
 .error-card-title{font-size:clamp(20px,3.5vw,29px);color:#2621c2;font-weight:850;margin:0 0 clamp(19px,3.6vw,31px)}
 .error-typing{font-size:clamp(15px,2.8vw,22px);color:#929292;line-height:1.65;white-space:pre-line;letter-spacing:-.05em;min-height:5em;margin:0}
+
+/* Intentional interrupted transmission at the exact cut-off of the error notice. */
+.error-screen.signal-cut .error-container{animation:errorSignalText .12s steps(2,end) infinite}
+.error-screen.signal-cut .error-typing{text-shadow:2px 0 #28565b,-2px 0 #693452}
+@keyframes errorSignalText{
+  0%{transform:translate(0,0);filter:contrast(1)}
+  45%{transform:translate(-5px,1px);filter:contrast(1.5)}
+  100%{transform:translate(4px,-1px);filter:contrast(.8)}
+}
+.error-signal-overlay{display:none;position:fixed;inset:0;z-index:54;pointer-events:none;overflow:hidden;background:rgba(0,0,0,.06)}
+.error-signal-overlay.active{display:block;animation:signalCut .92s steps(1,end) both}
+.error-signal-overlay.active::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.27) 0 3px,transparent 3px 7px),repeating-linear-gradient(90deg,rgba(10,15,18,.18) 0 2px,transparent 2px 6px);animation:signalDrift .08s steps(2,end) infinite}
+.error-signal-overlay.active::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 21px,rgba(255,255,255,.27) 22px 24px,rgba(0,0,0,.72) 25px 36px,transparent 37px 70px);animation:signalDrift .13s steps(3,end) infinite;mix-blend-mode:multiply}
+@keyframes signalDrift{0%{transform:translate(0,0)}40%{transform:translate(8px,13px)}100%{transform:translate(-7px,-9px)}}
+@keyframes signalCut{0%{background:rgba(0,0,0,.04)}15%{background:rgba(0,0,0,.45)}25%{background:rgba(0,0,0,.14)}43%{background:rgba(0,0,0,.78)}57%{background:rgba(0,0,0,.26)}68%{background:rgba(0,0,0,.94)}80%,100%{background:#000}}
+
 .mail-end{display:none;position:fixed;inset:0;z-index:55;background:#000;align-items:center;justify-content:center;padding:0 9.5%}
 .mail-alert{background:#34575a;border-radius:16px;color:white;width:min(100%,720px);padding:clamp(22px,4.8vw,40px);transform:translateY(115px);opacity:0;transition:transform .65s cubic-bezier(.2,.8,.15,1),opacity .65s}
 .mail-end.arrived .mail-alert{transform:translateY(0);opacity:1}
@@ -430,6 +446,7 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  </div>
 </main>
 <section id="errorScreen" class="error-screen" aria-live="polite"><div class="error-container"><h1 class="error-heading">페이지를 읽을 수 없습니다.</h1><p class="error-subheading">시간이 지난 뒤 다시 시도해주세요.</p><div class="error-card"><h2 class="error-card-title">오류에 대해 안내드립니다.</h2><p class="error-typing" id="errorTyping"></p></div></div></section>
+<div id="errorSignalOverlay" class="error-signal-overlay" aria-hidden="true"></div>
 <section id="mailEnd" class="mail-end"><div class="mail-alert"><div class="mail-row"><h2>메일이 도착했어요!</h2><button id="mailClose" class="mail-close" type="button">닫기</button></div><p>Next Stop... 2026.11.23.</p></div></section>
 <script>
 (()=>{
@@ -652,13 +669,13 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
   }
  };
 
- // The 90-second window begins at entry, not during intro loading. One window per visit.
- const VISIT_MS=90000, TICK_START_MS=50000;
+ // The 70-second window begins at entry, not during intro loading. One window per visit.
+ const VISIT_MS=70000, TICK_START_MS=50000;
  let visitStarted=0,visitFrame=null,visitTickMark=-1,endingStarted=false;
- let recoveryTimer=null,errorTimer=null,mailTimer=null,loginView='main';
+ let recoveryTimer=null,errorTimer=null,mailTimer=null,signalTimer=null,loginView='main';
  function clockTickDeadline(level){
   if(!soundEnabled||!audioCtx)return;
-  // The same light bell-like tick, gradually louder between 50 and 90 seconds.
+  // The same light bell-like tick, gradually louder between 50 and 70 seconds.
   const loud=.003+Math.min(1,Math.max(0,level))*.047;
   noiseBurst(.015,loud*.55,2100);
   tone(1080,.20,loud,'sine');
@@ -682,7 +699,8 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  const ERROR_PREFIX='페이지가 갑자기 다운되었을 경우, 다음을 따라주세요.\n카밀레교 사이트는 기본적으로 두 가지로 제공되고 있습니다.\n등록된 신도일 경우 신도 전용 홈페';
  function showError(){
   if(endingStarted)return;
-  endingStarted=true;stopVisit();clearNormalFlash();clearLeak();clearTimeout(recoveryTimer);clearTimeout(errorTimer);clearTimeout(mailTimer);
+  endingStarted=true;stopVisit();clearNormalFlash();clearLeak();clearTimeout(recoveryTimer);clearTimeout(errorTimer);clearTimeout(mailTimer);clearTimeout(signalTimer);
+  $('errorScreen').classList.remove('signal-cut');$('errorSignalOverlay').classList.remove('active');
   stopClock();stopFilm();stopBlackouts();stopTvSnow();
   currentMode='error';$('normal').style.display='none';$('easter').style.display='none';detail.style.display='none';$('verify').style.display='none';$('entryLoading').style.display='none';$('loading').style.display='none';soundBtn.style.display='none';
   $('errorScreen').style.display='block';$('errorTyping').textContent='';document.body.style.background='#fff';window.scrollTo(0,0);
@@ -690,10 +708,28 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
   const begin=performance.now();let printed=0;
   function step(now){if(currentMode!=='error')return;const count=Math.min(ERROR_PREFIX.length,Math.floor((now-begin)/13000*ERROR_PREFIX.length));
    if(count>printed){$('errorTyping').textContent=ERROR_PREFIX.slice(0,count);printed=count;noiseBurst(.015,.006,560)}
-   if(now-begin>=13000){$('errorTyping').textContent=ERROR_PREFIX;mailTimer=setTimeout(showMail,60);return}
+   if(now-begin>=13000){$('errorTyping').textContent=ERROR_PREFIX;beginErrorSignalCut();return}
    errorTimer=requestAnimationFrame(step);
   }
   errorTimer=requestAnimationFrame(step);
+ }
+ function beginErrorSignalCut(){
+  if(currentMode!=='error')return;
+  currentMode='error-transition';
+  $('errorScreen').classList.add('signal-cut');
+  $('errorSignalOverlay').classList.add('active');
+  // Short torn-tape/static burst; the low filtered noise makes it feel deliberately interrupted.
+  for(let i=0;i<7;i++)setTimeout(()=>{
+   if(currentMode!=='error-transition')return;
+   noiseBurst(.075+(i%3)*.025,.034+(i%2)*.012,260+(i%4)*155);
+  },i*100);
+  mechanicalImpact(0,.55,.74);
+  signalTimer=setTimeout(()=>{
+   if(currentMode!=='error-transition')return;
+   $('errorScreen').classList.remove('signal-cut');
+   $('errorSignalOverlay').classList.remove('active');
+   showMail();
+  },920);
  }
  function mailSound(){tone(490,.22,.035,'sine');setTimeout(()=>tone(720,.4,.038,'sine'),160)}
  function showMail(){

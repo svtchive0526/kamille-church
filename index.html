@@ -38,14 +38,15 @@
 .loading.dark-cut .loader-content{opacity:0}
 /* Deliberate one-second Easter entry handshake */
 .entry-loading{display:none;position:fixed;inset:0;z-index:12;place-items:center;background:#101010;color:#fff;text-align:center;padding:25px}
-/* The final second: pale photographic grain, glitch tearing, no full-screen white flash. */
-.entry-noise{position:absolute;inset:0;pointer-events:none;opacity:0;background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(226,225,230,.34) 3px,transparent 5px),repeating-linear-gradient(91deg,rgba(245,245,245,.13) 0 3px,rgba(72,72,82,.25) 3px 10px),linear-gradient(120deg,transparent 20%,rgba(205,206,218,.16) 49%,transparent 79%);mix-blend-mode:screen}
-.entry-loading.noisy .entry-noise{opacity:.98;animation:entryStatic .055s steps(4) infinite}
-.entry-loading.noisy::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 19px,rgba(234,232,238,.23) 20px 23px,rgba(6,6,9,.38) 24px 29px,transparent 30px 61px);animation:entryTear .12s steps(3) infinite;opacity:.86}
-.entry-loading.noisy>div:not(.entry-noise){animation:entryWobble .085s steps(2) infinite;text-shadow:3px 0 rgba(225,225,240,.7),-4px 0 rgba(115,110,125,.8)}
-@keyframes entryTear{0%{clip-path:inset(0 0 0 0);transform:translateX(-8px)}35%{clip-path:inset(18% 0 46% 0);transform:translateX(19px)}70%{clip-path:inset(50% 0 13% 0);transform:translateX(-17px)}100%{clip-path:inset(0 0 0 0);transform:translateX(5px)}}
-@keyframes entryStatic{0%{transform:translate(0,0)}50%{transform:translate(-8px,5px)}100%{transform:translate(6px,-4px)}}
-@keyframes entryWobble{0%{transform:translate(-2px,0)}50%{transform:translate(2px,1px)}100%{transform:translate(0,-1px)}}
+/* Genuine monochrome TV no-signal snow, raster noise, drifting sync bars. */
+.entry-noise{position:absolute;inset:0;pointer-events:none;opacity:0;background:#111;overflow:hidden}
+.entry-noise canvas{width:100%;height:100%;display:block;image-rendering:pixelated;filter:contrast(1.3)}
+.entry-loading.noisy .entry-noise{opacity:1}
+.entry-loading.noisy::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 2px,transparent 2px 5px);animation:tvRoll .17s linear infinite}
+.entry-loading.noisy>div:not(.entry-noise){opacity:0}
+@keyframes tvRoll{from{transform:translateY(0)}to{transform:translateY(11px)}}
+/* During the second loading, the whole screen intermittently cuts to total darkness. */
+.loading.second-blackout::after{content:"";position:absolute;inset:0;z-index:5;pointer-events:none;background:#000;opacity:1}
 .entry-loading .entry-message{font-size:clamp(18px,4.7vw,38px);font-weight:750}
 .entry-loading .entry-number{font-size:clamp(22px,5vw,42px);margin-top:24px;font-variant-numeric:tabular-nums}
 .sound-toggle{position:fixed;bottom:max(24px,calc(env(safe-area-inset-bottom) + 18px));left:50%;transform:translateX(-50%);z-index:25;border:1px solid #555;color:#bbb;background:#202020;border-radius:18px;padding:7px 11px;font-size:11px;letter-spacing:0;cursor:pointer}
@@ -86,7 +87,7 @@
  <div class="verify-inner"><h1 class="verify-question" id="verifyQuestion">묻겠습니다. 신도가 맞으신가요?</h1>
  <label class="verify-check" id="checkLabel"><input id="accept" type="checkbox"><span>신도가 맞습니다.</span></label></div>
 </section>
-<section id="entryLoading" class="entry-loading screen"><div class="entry-noise"></div><div><div id="entryMessage" class="entry-message">신도님, 반갑습니다.</div><div id="entryPercent" class="entry-number">00%</div></div></section>
+<section id="entryLoading" class="entry-loading screen"><div class="entry-noise"><canvas id="tvSnow" aria-hidden="true"></canvas></div><div><div id="entryMessage" class="entry-message">신도님, 반갑습니다.</div><div id="entryPercent" class="entry-number">00%</div></div></section>
 <main id="normal" class="home normal screen">
  <h1 class="home-header">카밀레교 사이트 방문을 환영합니다!</h1>
  <div class="cards"><div class="menu-card"><h2 class="card-title">카밀레교</h2><p class="card-description">카밀레교에 대해 궁금한 점이 있으신가요?</p></div>
@@ -105,28 +106,28 @@
 (()=>{
  'use strict';
  const $=id=>document.getElementById(id);
- const loading=$('loading'),label=$('loadText'),percentage=$('percent'),verify=$('verify'),question=$('verifyQuestion'),accept=$('accept'),soundBtn=$('soundBtn'),entryLoading=$('entryLoading'),entryPercent=$('entryPercent'),entryMessage=$('entryMessage');
+ const loading=$('loading'),label=$('loadText'),percentage=$('percent'),verify=$('verify'),question=$('verifyQuestion'),accept=$('accept'),soundBtn=$('soundBtn'),entryLoading=$('entryLoading'),entryPercent=$('entryPercent'),entryMessage=$('entryMessage'),tvSnow=$('tvSnow');
  const params=new URLSearchParams(location.search);
  // TEST ONLY: ?mode=normal or ?mode=easter. Without mode, each visit is random 30%.
  const forced=params.get('mode');
  const easter=forced==='easter'?true:forced==='normal'?false:Math.random()<0.30;
- let audioCtx=null, soundEnabled=false, typingTimer=null, progressFrame=null, questionTimer=null, failTimer=null, currentMode='loading', filmInterval=null, filmPulseTimeouts=[], clockTimer=null, clockBeats=0;
- function unlockAudio(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume();soundEnabled=true;soundBtn.textContent='소리 켜짐';soundBtn.setAttribute('aria-pressed','true')}catch(e){soundBtn.textContent='소리 사용 불가'}}
+ let audioCtx=null, audioOutput=null, soundEnabled=false, typingTimer=null, progressFrame=null, questionTimer=null, failTimer=null, currentMode='loading', filmInterval=null, filmPulseTimeouts=[], clockTimer=null, clockBeats=0;
+ function unlockAudio(){try{if(!audioCtx){audioCtx=new (window.AudioContext||window.webkitAudioContext)();audioOutput=audioCtx.createDynamicsCompressor();audioOutput.threshold.value=-9;audioOutput.knee.value=8;audioOutput.ratio.value=3;audioOutput.attack.value=.003;audioOutput.release.value=.15;audioOutput.connect(audioCtx.destination)}audioCtx.resume();soundEnabled=true;soundBtn.textContent='소리 켜짐';soundBtn.setAttribute('aria-pressed','true')}catch(e){soundBtn.textContent='소리 사용 불가'}}
  soundBtn.addEventListener('click',()=>{unlockAudio();if(currentMode==='second')startFilm();if(currentMode==='verify')startClock()});
  // Overall output loudness. Preserve the lower pitch and slower effect timing.
- const SOUND_VOLUME_MULTIPLIER=4.5; // louder than the previous version; individual bursts remain capped
+ const SOUND_VOLUME_MULTIPLIER=11; // >2x the previous source gains; compressor reduces clipping
  // Web Audio synthesized effects, avoiding external sound files and autoplay errors.
  function tone(freq=450,duration=.024,volume=.022,type='square'){
   if(!soundEnabled||!audioCtx)return;
-  try{const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime;o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(Math.min(volume*SOUND_VOLUME_MULTIPLIER,0.8),t);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+duration+.005)}catch(e){}
+  try{const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime;o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(Math.min(volume*SOUND_VOLUME_MULTIPLIER,0.95),t);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(audioOutput);o.start(t);o.stop(t+duration+.005)}catch(e){}
  }
  // Filtered noise buffers produce convincing mechanical camera sounds without audio files.
  function noiseBurst(duration=.10,volume=.07,cutoff=1100,at=0){
   if(!soundEnabled||!audioCtx)return;
   try{const t=audioCtx.currentTime+at,rate=audioCtx.sampleRate,n=Math.ceil(rate*duration),buffer=audioCtx.createBuffer(1,n,rate),data=buffer.getChannelData(0);
    for(let i=0;i<n;i++)data[i]=(Math.random()*2-1)*(1-i/n);
-   const source=audioCtx.createBufferSource(),filter=audioCtx.createBiquadFilter(),gain=audioCtx.createGain();source.buffer=buffer;filter.type='lowpass';filter.frequency.value=cutoff;gain.gain.setValueAtTime(Math.min(volume*SOUND_VOLUME_MULTIPLIER,0.8),t);gain.gain.exponentialRampToValueAtTime(.0001,t+duration);
-   source.connect(filter);filter.connect(gain);gain.connect(audioCtx.destination);source.start(t);source.stop(t+duration+.002)}catch(e){}
+   const source=audioCtx.createBufferSource(),filter=audioCtx.createBiquadFilter(),gain=audioCtx.createGain();source.buffer=buffer;filter.type='lowpass';filter.frequency.value=cutoff;gain.gain.setValueAtTime(Math.min(volume*SOUND_VOLUME_MULTIPLIER,0.95),t);gain.gain.exponentialRampToValueAtTime(.0001,t+duration);
+   source.connect(filter);filter.connect(gain);gain.connect(audioOutput);source.start(t);source.stop(t+duration+.002)}catch(e){}
  }
  function switchHeadline(el,message){
   el.textContent=message;
@@ -151,6 +152,32 @@
    }
   },i*67+Math.random()*28);
  }
+ let snowFrame=0, snowRunning=false, snowLast=0;
+ function tvSnowDraw(time){
+  if(!snowRunning)return;
+  snowFrame=requestAnimationFrame(tvSnowDraw);
+  if(time-snowLast<48)return;
+  snowLast=time;
+  const ctx=tvSnow.getContext('2d',{alpha:false});
+  if(!ctx)return;
+  const w=240,h=160;
+  if(tvSnow.width!==w){tvSnow.width=w;tvSnow.height=h}
+  const img=ctx.createImageData(w,h),d=img.data;
+  const shift=Math.floor(Math.random()*w),stripeY=Math.floor(Math.random()*h);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+   const i=(y*w+x)*4;
+   let v=45+Math.floor(Math.random()*190);
+   if(Math.abs(y-stripeY)<4)v=Math.min(232,v+45);
+   if(((x+shift)%57)<2 && Math.random()<.2)v=20;
+   d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;
+  }
+  ctx.putImageData(img,0,0);
+  ctx.fillStyle='rgba(6,6,6,.32)';
+  const band=(Math.floor(time*.1)% (h+45))-22;
+  ctx.fillRect((Math.random()-.5)*20,band,w+20,8+Math.random()*14);
+ }
+ function startTvSnow(){if(snowRunning)return;snowRunning=true;snowFrame=requestAnimationFrame(tvSnowDraw)}
+ function stopTvSnow(){snowRunning=false;cancelAnimationFrame(snowFrame)}
  function elevatorArrivalSound(){ // soft, dampened metal bell with a short decaying tail
   if(!soundEnabled||!audioCtx)return;
   // Small bell chime is the only intentionally pitched sound in the sequence.
@@ -158,12 +185,13 @@
   setTimeout(()=>tone(440,.48,.029,'sine'),165);
   noiseBurst(.10,.028,720);
  }
- // Dry clock escapement: two short low, filtered wooden/metallic ticks, no pitched oscillator.
+ // Brighter, sacred-sounding clock tick: a crisp attack with a clear, gently ringing tail.
  function clockTick(){
   if(!soundEnabled||!audioCtx||currentMode!=='verify')return;
   const tock=(clockBeats++%2)===1;
-  noiseBurst(.019,tock?.053:.066,tock?320:470);
-  noiseBurst(.039,tock?.020:.027,tock?185:270,.026);
+  noiseBurst(.016,tock?.044:.052,tock?1700:2200);
+  tone(tock?920:1140,.24,.032,'sine');
+  tone(tock?1380:1710,.15,.008,'sine');
  }
  function stopClock(){if(clockTimer!==null){clearInterval(clockTimer);clockTimer=null}}
  function startClock(){stopClock();if(currentMode!=='verify')return;clockTick();clockTimer=setInterval(()=>{if(currentMode==='verify')clockTick();else stopClock()},1000)}
@@ -206,8 +234,21 @@
  function animateInitial(now){const progress=Math.min((now-start)/5000,1);setPercent(progress*100);if(progress<1){progressFrame=requestAnimationFrame(animateInitial)}else{setPercent(100);clearTimeout(typingTimer);label.textContent=TYPE;if(easter)beginGlitch();else showHome('normal')}}
  progressFrame=requestAnimationFrame(animateInitial);
  function beginGlitch(){currentMode='glitch';loading.classList.add('glitching');glitchSound();setTimeout(()=>{switchHeadline(label,'당신은 오래전부터 저희의 가족이었습니다.')},660);setTimeout(()=>{loading.classList.remove('glitching');beginSecondLoad()},1350)}
- function beginSecondLoad(){currentMode='second';startFilm();const t0=performance.now();function frame(now){if(currentMode!=='second')return;let elapsed=now-t0;let cycle=(elapsed%1500)/1500;let value=100-10*(cycle<.5?cycle*2:(1-cycle)*2);setPercent(value);if(elapsed<6000)progressFrame=requestAnimationFrame(frame);else endSecondLoad()}progressFrame=requestAnimationFrame(frame)}
- function endSecondLoad(){stopFilm();currentMode='transition';loading.classList.add('dark-cut');setTimeout(()=>{loading.style.display='none';showVerify()},300)}
+ let blackoutTimers=[];
+ function stopBlackouts(){blackoutTimers.forEach(clearTimeout);blackoutTimers=[];loading.classList.remove('second-blackout')}
+ function startBlackouts(){
+  stopBlackouts();
+  // Quick irregular complete-black frames, never a bright flash.
+  [620,1240,1380,2180,3010,3160,4020,4780,4910,5510].forEach((when,i)=>{
+   blackoutTimers.push(setTimeout(()=>{
+    if(currentMode!=='second')return;
+    loading.classList.add('second-blackout');
+    blackoutTimers.push(setTimeout(()=>loading.classList.remove('second-blackout'),i%3===1?155:80));
+   },when));
+  });
+ }
+ function beginSecondLoad(){currentMode='second';startFilm();startBlackouts();const t0=performance.now();function frame(now){if(currentMode!=='second')return;let elapsed=now-t0;let cycle=(elapsed%1500)/1500;let value=100-10*(cycle<.5?cycle*2:(1-cycle)*2);setPercent(value);if(elapsed<6000)progressFrame=requestAnimationFrame(frame);else endSecondLoad()}progressFrame=requestAnimationFrame(frame)}
+ function endSecondLoad(){stopFilm();stopBlackouts();currentMode='transition';loading.classList.add('dark-cut');setTimeout(()=>{loading.style.display='none';showVerify()},300)}
  function showVerify(){currentMode='verify';verify.style.display='grid';startClock();question.textContent='묻겠습니다. 신도가 맞으신가요?';accept.checked=false;verify.classList.remove('fail');const delay=5000;
   questionTimer=setTimeout(()=>{if(currentMode==='verify'){switchHeadline(question,'지금 그 분을 의심하시는 건가요?');shutterSound()}},delay);
   failTimer=setTimeout(()=>{if(currentMode!=='verify')return;currentMode='failed';stopClock();verify.classList.add('fail');switchHeadline(question,'자격이 없습니다.');shutterSound();setTimeout(()=>showHome('normal'),7000)},delay+5000);
@@ -224,16 +265,16 @@
    const progress=Math.min(1,elapsed/6000);
    entryPercent.textContent=String(Math.floor(progress*100)).padStart(2,'0')+'%';
    if(elapsed>=6000&&!staticStarted){
-    staticStarted=true;entryPercent.textContent='100%';entryLoading.classList.add('noisy');entryStaticSound();
+    staticStarted=true;entryPercent.textContent='100%';entryLoading.classList.add('noisy');startTvSnow();entryStaticSound();
    }
    if(elapsed>=7000){
-    entryLoading.classList.remove('noisy');elevatorArrivalSound();showHome('easter');return;
+    entryLoading.classList.remove('noisy');stopTvSnow();elevatorArrivalSound();showHome('easter');return;
    }
    requestAnimationFrame(entryFrame);
   }
   requestAnimationFrame(entryFrame);
  }
- function showHome(mode){currentMode='home';stopClock();clearTimeout(questionTimer);clearTimeout(failTimer);verify.style.display='none';loading.style.display='none';entryLoading.style.display='none';stopFilm();$('normal').style.display=mode==='normal'?'block':'none';$('easter').style.display=mode==='easter'?'block':'none';soundBtn.style.display='none';document.body.style.background=mode==='easter'?'#6200ff':'#fff';document.title='카밀레교 | '+(mode==='easter'?'귀의를 환영합니다':'환영합니다');window.scrollTo(0,0)}
+ function showHome(mode){currentMode='home';stopTvSnow();stopBlackouts();stopClock();clearTimeout(questionTimer);clearTimeout(failTimer);verify.style.display='none';loading.style.display='none';entryLoading.style.display='none';stopFilm();$('normal').style.display=mode==='normal'?'block':'none';$('easter').style.display=mode==='easter'?'block':'none';soundBtn.style.display='none';document.body.style.background=mode==='easter'?'#6200ff':'#fff';document.title='카밀레교 | '+(mode==='easter'?'귀의를 환영합니다':'환영합니다');window.scrollTo(0,0)}
 })();
 </script>
 </body>

@@ -69,7 +69,7 @@
  <div class="verify-inner"><h1 class="verify-question" id="verifyQuestion">묻겠습니다. 신도가 맞으신가요?</h1>
  <label class="verify-check" id="checkLabel"><input id="accept" type="checkbox"><span>신도가 맞습니다.</span></label></div>
 </section>
-<section id="entryLoading" class="entry-loading screen"><div><div class="entry-message">접속 중입니다...</div><div id="entryPercent" class="entry-number">00%</div></div></section>
+<section id="entryLoading" class="entry-loading screen"><div><div class="entry-message">신도님, 반갑습니다.</div><div id="entryPercent" class="entry-number">00%</div></div></section>
 <main id="normal" class="home normal screen">
  <h1 class="home-header">카밀레교 사이트 방문을 환영합니다!</h1>
  <div class="cards"><div class="menu-card"><h2 class="card-title">카밀레교</h2><p class="card-description">카밀레교에 대해 궁금한 점이 있으신가요?</p></div>
@@ -109,22 +109,22 @@
    const source=audioCtx.createBufferSource(),filter=audioCtx.createBiquadFilter(),gain=audioCtx.createGain();source.buffer=buffer;filter.type='lowpass';filter.frequency.value=cutoff;gain.gain.setValueAtTime(volume,t);gain.gain.exponentialRampToValueAtTime(.0001,t+duration);
    source.connect(filter);filter.connect(gain);gain.connect(audioCtx.destination);source.start(t);source.stop(t+duration+.002)}catch(e){}
  }
- function shutterSound(){ // old analog shutter: click, spring, curtain slap
-  noiseBurst(.025,.12,2100,0);noiseBurst(.070,.095,950,.045);noiseBurst(.10,.045,500,.12);
-  tone(195,.045,.018,'triangle');
+ function shutterSound(){ // muted, slowed analog shutter with a low mechanical tail
+  noiseBurst(.055,.065,650,0);noiseBurst(.135,.06,380,.10);noiseBurst(.21,.035,220,.23);
+  tone(82,.16,.014,'triangle');
  }
- function filmSound(){ // warped, unsettling reel movement with irregular mechanical ticks
+ function filmSound(){ // slower, lower distorted reel with subdued irregular ticks
   if(!soundEnabled||!audioCtx)return;
-  noiseBurst(.13,.035,380);tone(77+Math.random()*45,.14,.017,'sawtooth');
-  if(Math.random()>.30){noiseBurst(.025,.06,1100,.09);tone(240+Math.random()*110,.025,.009,'square')}
+  noiseBurst(.24,.022,240);tone(42+Math.random()*26,.30,.010,'sawtooth');
+  if(Math.random()>.42){noiseBurst(.06,.03,480,.16);tone(90+Math.random()*65,.075,.006,'triangle')}
  }
- function startFilm(){stopFilm();filmSound();filmInterval=setInterval(()=>{if(currentMode==='second')filmSound()},185)}
+ function startFilm(){stopFilm();filmSound();filmInterval=setInterval(()=>{if(currentMode==='second')filmSound()},320)}
  function stopFilm(){if(filmInterval!==null){clearInterval(filmInterval);filmInterval=null}}
- function glitchSound(){if(!soundEnabled||!audioCtx)return;for(let i=0;i<38;i++)setTimeout(()=>{if(currentMode==='glitch'){noiseBurst(.045,.043,500+Math.random()*1150);tone(55+Math.random()*280,.035+Math.random()*.055,.022,'sawtooth')}},i*32)}
+ function glitchSound(){if(!soundEnabled||!audioCtx)return;for(let i=0;i<22;i++)setTimeout(()=>{if(currentMode==='glitch'){noiseBurst(.095,.028,180+Math.random()*440);tone(35+Math.random()*125,.09+Math.random()*.09,.012,'sawtooth')}},i*58)}
  function setPercent(value){percentage.textContent=String(Math.round(value)).padStart(2,'0')+'%'}
  const TYPE='접속을 위해 대기중입니다...'; let index=0, erasing=false;
  function typeStep(){if(currentMode!=='loading')return;
-  if(!erasing){index=Math.min(TYPE.length,index+1);label.textContent=TYPE.slice(0,index);if(index>0)tone(290+Math.random()*160,.018,.015);if(index===TYPE.length){erasing=true;typingTimer=setTimeout(typeStep,400);return}}
+  if(!erasing){index=Math.min(TYPE.length,index+1);label.textContent=TYPE.slice(0,index);if(index>0)tone(130+Math.random()*75,.045,.009,'triangle');if(index===TYPE.length){erasing=true;typingTimer=setTimeout(typeStep,400);return}}
   else{index=Math.max(0,index-2);label.textContent=TYPE.slice(0,index);if(index===0)erasing=false}
   typingTimer=setTimeout(typeStep,erasing?35:75);
  }
@@ -135,9 +135,9 @@
  function beginGlitch(){currentMode='glitch';loading.classList.add('glitching');glitchSound();setTimeout(()=>{label.textContent='당신은 오래전부터 저희의 가족이었습니다.'},660);setTimeout(()=>{loading.classList.remove('glitching');beginSecondLoad()},1350)}
  function beginSecondLoad(){currentMode='second';startFilm();const t0=performance.now();function frame(now){if(currentMode!=='second')return;let elapsed=now-t0;let cycle=(elapsed%1500)/1500;let value=100-10*(cycle<.5?cycle*2:(1-cycle)*2);setPercent(value);if(elapsed<6000)progressFrame=requestAnimationFrame(frame);else endSecondLoad()}progressFrame=requestAnimationFrame(frame)}
  function endSecondLoad(){stopFilm();currentMode='transition';loading.classList.add('dark-cut');setTimeout(()=>{loading.style.display='none';showVerify()},300)}
- function showVerify(){currentMode='verify';verify.style.display='grid';question.textContent='묻겠습니다. 신도가 맞으신가요?';accept.checked=false;verify.classList.remove('fail');const delay=2500;
+ function showVerify(){currentMode='verify';verify.style.display='grid';question.textContent='묻겠습니다. 신도가 맞으신가요?';accept.checked=false;verify.classList.remove('fail');const delay=5000;
   questionTimer=setTimeout(()=>{if(currentMode==='verify'){question.textContent='지금 그 분을 의심하시는 건가요?';shutterSound()}},delay);
-  failTimer=setTimeout(()=>{if(currentMode!=='verify')return;currentMode='failed';verify.classList.add('fail');question.textContent='자격이 없습니다.';shutterSound();setTimeout(()=>showHome('normal'),1500)},delay+2500);
+  failTimer=setTimeout(()=>{if(currentMode!=='verify')return;currentMode='failed';verify.classList.add('fail');question.textContent='자격이 없습니다.';shutterSound();setTimeout(()=>showHome('normal'),7000)},delay+5000);
  }
  accept.addEventListener('change',()=>{if(!accept.checked||currentMode!=='verify')return;clearTimeout(questionTimer);clearTimeout(failTimer);showEasterEntry()});
  function showEasterEntry(){

@@ -49,7 +49,7 @@
 .loading.second-blackout::after{content:"";position:absolute;inset:0;z-index:5;pointer-events:none;background:#000;opacity:1}
 .entry-loading .entry-message{font-size:clamp(18px,4.7vw,38px);font-weight:750}
 .entry-loading .entry-number{font-size:clamp(22px,5vw,42px);margin-top:24px;font-variant-numeric:tabular-nums}
-.sound-toggle{position:fixed;bottom:max(24px,calc(env(safe-area-inset-bottom) + 18px));left:50%;transform:translateX(-50%);z-index:25;border:1px solid #555;color:#bbb;background:#202020;border-radius:18px;padding:7px 11px;font-size:11px;letter-spacing:0;cursor:pointer}
+.sound-toggle{touch-action:manipulation;-webkit-tap-highlight-color:transparent;position:fixed;bottom:max(24px,calc(env(safe-area-inset-bottom) + 18px));left:50%;transform:translateX(-50%);z-index:25;border:1px solid #555;color:#bbb;background:#202020;border-radius:18px;padding:7px 11px;font-size:11px;letter-spacing:0;cursor:pointer}
 .verify{display:none;position:fixed;inset:0;background:#101010;z-index:11;color:#fff;place-items:center;padding:20px;text-align:center}
 .verify-inner{transform:translateY(-1%);width:100%;}
 .verify-question{font-size:clamp(18px,4.7vw,40px);font-weight:760;line-height:1.4;letter-spacing:-.06em;margin:0 0 26px}
@@ -458,8 +458,62 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  const forced=params.get('mode');
  const easter=forced==='easter'?true:forced==='normal'?false:Math.random()<0.30;
  let audioCtx=null, audioOutput=null, soundEnabled=false, typingTimer=null, progressFrame=null, questionTimer=null, failTimer=null, currentMode='loading', filmInterval=null, filmPulseTimeouts=[], clockTimer=null, clockBeats=0;
- function unlockAudio(){try{if(!audioCtx){audioCtx=new (window.AudioContext||window.webkitAudioContext)();audioOutput=audioCtx.createDynamicsCompressor();audioOutput.threshold.value=-9;audioOutput.knee.value=8;audioOutput.ratio.value=3;audioOutput.attack.value=.003;audioOutput.release.value=.15;audioOutput.connect(audioCtx.destination)}audioCtx.resume();soundEnabled=true;soundBtn.textContent='소리 켜짐';soundBtn.setAttribute('aria-pressed','true')}catch(e){soundBtn.textContent='소리 사용 불가'}}
- soundBtn.addEventListener('click',()=>{unlockAudio();if(['second','transition','verify'].includes(currentMode))startClock()});
+ // Mobile Safari/Chrome only permit starting Web Audio directly from a user gesture.
+ // Keep the enable control available even after leaving the loading screen.
+ let audioUnlockPending=false;
+ function unlockAudio(){
+  if(audioCtx&&audioCtx.state==='running'){
+   soundEnabled=true;soundBtn.textContent='소리 켜짐';
+   soundBtn.setAttribute('aria-pressed','true');return;
+  }
+  try{
+   if(!audioCtx){
+    const Ctx=window.AudioContext||window.webkitAudioContext;
+    if(!Ctx)throw new Error('Web Audio is unavailable');
+    audioCtx=new Ctx();
+    audioOutput=audioCtx.createDynamicsCompressor();
+    audioOutput.threshold.value=-9;audioOutput.knee.value=8;audioOutput.ratio.value=3;
+    audioOutput.attack.value=.003;audioOutput.release.value=.15;
+    audioOutput.connect(audioCtx.destination);
+    // Start a silent buffer in the user gesture to prime the iOS audio session.
+    const buffer=audioCtx.createBuffer(1,1,audioCtx.sampleRate);
+    const source=audioCtx.createBufferSource();source.buffer=buffer;
+    source.connect(audioOutput);source.start(0);
+   }
+   soundEnabled=true;
+   soundBtn.textContent='소리 연결 중…';
+   if(!audioUnlockPending){
+    audioUnlockPending=true;
+    Promise.resolve(audioCtx.resume()).then(()=>{
+     audioUnlockPending=false;
+     const running=audioCtx.state==='running';
+     soundEnabled=running;
+     soundBtn.textContent=running?'소리 켜짐':'소리 켜기';
+     soundBtn.setAttribute('aria-pressed',String(running));
+    }).catch(()=>{
+     audioUnlockPending=false;soundEnabled=false;
+     soundBtn.textContent='소리 켜기';soundBtn.setAttribute('aria-pressed','false');
+    });
+   }
+  }catch(e){soundEnabled=false;soundBtn.textContent='소리 사용 불가'}
+ }
+ // The first tap anywhere (including on a link or checkbox) can unlock audio.
+ // Retain the explicit bottom-center sound button as a fallback.
+ document.addEventListener('pointerdown',unlockAudio,{capture:true,passive:true});
+ document.addEventListener('touchstart',unlockAudio,{capture:true,passive:true});
+ document.addEventListener('keydown',unlockAudio,{capture:true});
+ soundBtn.addEventListener('click',()=>{
+  unlockAudio();
+  if(['second','transition','verify'].includes(currentMode))startClock();
+  // Audible confirmation when the visitor deliberately enables sound.
+  setTimeout(()=>{if(soundEnabled)tone(820,.16,.018,'sine')},110);
+ });
+ document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden&&audioCtx&&audioCtx.state!=='running'){
+   soundEnabled=false;soundBtn.textContent='소리 켜기';
+   soundBtn.setAttribute('aria-pressed','false');
+  }
+ });
  // Overall output loudness. Preserve the lower pitch and slower effect timing.
  const SOUND_VOLUME_MULTIPLIER=11; // >2x the previous source gains; compressor reduces clipping
  // Web Audio synthesized effects, avoiding external sound files and autoplay errors.
@@ -702,7 +756,7 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
   endingStarted=true;stopVisit();clearNormalFlash();clearLeak();clearTimeout(recoveryTimer);clearTimeout(errorTimer);clearTimeout(mailTimer);clearTimeout(signalTimer);
   $('errorScreen').classList.remove('signal-cut');$('errorSignalOverlay').classList.remove('active');
   stopClock();stopFilm();stopBlackouts();stopTvSnow();
-  currentMode='error';$('normal').style.display='none';$('easter').style.display='none';detail.style.display='none';$('verify').style.display='none';$('entryLoading').style.display='none';$('loading').style.display='none';soundBtn.style.display='none';
+  currentMode='error';$('normal').style.display='none';$('easter').style.display='none';detail.style.display='none';$('verify').style.display='none';$('entryLoading').style.display='none';$('loading').style.display='none';soundBtn.style.display='block';
   $('errorScreen').style.display='block';$('errorTyping').textContent='';document.body.style.background='#fff';window.scrollTo(0,0);
   // Character-by-character typing, ending immediately after the syllable 페 at 13 seconds.
   const begin=performance.now();let printed=0;
@@ -893,7 +947,7 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  fluxArrow.addEventListener('click',()=>{introIndex=(introIndex+1)%3;paintDetail(detailMode)});
  missionTabs.forEach((button,i)=>button.addEventListener('click',()=>{missionIndex=i;paintDetail(detailMode)}));
 
- function showHome(mode,resetVisit=false){clearNormalFlash();currentMode='home';stopTvSnow();stopBlackouts();stopClock();clearTimeout(questionTimer);clearTimeout(failTimer);verify.style.display='none';loading.style.display='none';entryLoading.style.display='none';stopFilm();$('normal').style.display=mode==='normal'?'block':'none';$('easter').style.display=mode==='easter'?'block':'none';soundBtn.style.display='none';document.body.style.background=mode==='easter'?'#6200ff':'#fff';document.title='카밀레교 | '+(mode==='easter'?'귀의를 환영합니다':'환영합니다');window.scrollTo(0,0);if(mode==='normal')scheduleNormalFlash();startVisit(resetVisit)}
+ function showHome(mode,resetVisit=false){clearNormalFlash();currentMode='home';stopTvSnow();stopBlackouts();stopClock();clearTimeout(questionTimer);clearTimeout(failTimer);verify.style.display='none';loading.style.display='none';entryLoading.style.display='none';stopFilm();$('normal').style.display=mode==='normal'?'block':'none';$('easter').style.display=mode==='easter'?'block':'none';soundBtn.style.display='block';document.body.style.background=mode==='easter'?'#6200ff':'#fff';document.title='카밀레교 | '+(mode==='easter'?'귀의를 환영합니다':'환영합니다');window.scrollTo(0,0);if(mode==='normal')scheduleNormalFlash();startVisit(resetVisit)}
 })();
 </script>
 </body>

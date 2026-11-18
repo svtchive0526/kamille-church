@@ -805,6 +805,42 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
   }
  };
 
+ // User-provided deep bell 05.mp3, dynamically amplified for clarity.
+ // Play three successive strikes. Deadline clock ticks use an independent audio path and remain audible.
+ const oathBellFile=fetch('./oath-bell-05.mp3').then(r=>{if(!r.ok)throw new Error('Bell file not found');return r.arrayBuffer()}).catch(()=>null);
+ let oathBellBuffer=null,oathBellNodes=[],oathBellSession=0;
+ function stopOathBell(){
+  oathBellSession++;
+  oathBellNodes.forEach(n=>{try{n.stop()}catch(e){} try{n.disconnect()}catch(e){}});
+  oathBellNodes=[];
+ }
+ async function playOathBellThreeTimes(){
+  stopOathBell();
+  const session=oathBellSession;
+  // The card click is a user gesture, allowing Web Audio playback on mobile.
+  if(!audioCtx||audioCtx.state!=='running')unlockAudio();
+  if(!audioCtx)return;
+  try{
+   const bytes=await oathBellFile;
+   if(!bytes||session!==oathBellSession)return;
+   if(!oathBellBuffer)oathBellBuffer=await audioCtx.decodeAudioData(bytes.slice(0));
+   if(session!==oathBellSession||currentMode!=='detail'||detailMode!=='easter'||detailPage!=='oath')return;
+   await audioCtx.resume();
+   if(session!==oathBellSession)return;
+   const start=audioCtx.currentTime+.025;
+   // Three strikes, allowing the long bell tail to decay naturally. Do not mute the deadline tick.
+   [0,6.5,13.0].forEach(offset=>{
+    const source=audioCtx.createBufferSource();
+    const gain=audioCtx.createGain();
+    source.buffer=oathBellBuffer;
+    gain.gain.value=1.08;
+    source.connect(gain);gain.connect(audioOutput);
+    source.start(start+offset);
+    source.onended=()=>{try{source.disconnect();gain.disconnect()}catch(e){}};
+    oathBellNodes.push(source);
+   });
+  }catch(e){/* Missing or disabled audio must never block page navigation. */}
+ }
  // The 70-second window begins at entry, not during intro loading. One window per visit.
  const VISIT_MS=70000, TICK_START_MS=50000;
  let visitStarted=0,visitFrame=null,visitTickMark=-1,endingStarted=false;
@@ -837,7 +873,7 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  function showError(){
   if(endingStarted)return;
   const opening=document.getElementById('launchOverlay');if(opening){opening.hidden=true;document.body.style.overflow=''}
-  endingStarted=true;stopVisit();clearNormalFlash();clearLeak();clearTimeout(recoveryTimer);clearTimeout(errorTimer);clearTimeout(mailTimer);clearTimeout(signalTimer);
+  endingStarted=true;stopOathBell();stopVisit();clearNormalFlash();clearLeak();clearTimeout(recoveryTimer);clearTimeout(errorTimer);clearTimeout(mailTimer);clearTimeout(signalTimer);
   $('errorScreen').classList.remove('signal-cut');$('errorSignalOverlay').classList.remove('active');
   stopClock();stopFilm();stopBlackouts();stopTvSnow();
   currentMode='error';$('normal').style.display='none';$('easter').style.display='none';detail.style.display='none';$('verify').style.display='none';$('entryLoading').style.display='none';$('loading').style.display='none';soundBtn.style.display='block';
@@ -1032,14 +1068,14 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
   },10000+Math.random()*5000);
  }
  function openDetail(mode,page='intro'){
-  clearLeak();clearNormalFlash();currentMode='detail';detailMode=mode;detailPage=page;introIndex=0;missionIndex=0;
+  stopOathBell();clearLeak();clearNormalFlash();currentMode='detail';detailMode=mode;detailPage=page;introIndex=0;missionIndex=0;
   $('normal').style.display='none';$('easter').style.display='none';
   if(page==='auth')setLoginView('main');
   detail.style.display='block';paintDetail(mode);
   document.body.style.background=mode==='easter'?'#000':'#fff';
-  document.title='카밀레교 | '+(page==='family'?'새 가족':'안내');window.scrollTo(0,0);scheduleLeak();if(mode==='normal')scheduleNormalFlash();
+  document.title='카밀레교 | '+(page==='family'?'새 가족':'안내');window.scrollTo(0,0);scheduleLeak();if(mode==='normal')scheduleNormalFlash();if(mode==='easter'&&page==='oath')playOathBellThreeTimes();
  }
- function backFromDetail(){clearTimeout(recoveryTimer);clearLeak();clearNormalFlash();detail.style.display='none';showHome(detailMode)}
+ function backFromDetail(){stopOathBell();clearTimeout(recoveryTimer);clearLeak();clearNormalFlash();detail.style.display='none';showHome(detailMode)}
  document.querySelectorAll('[data-detail]').forEach(node=>{
   node.addEventListener('click',()=>openDetail(node.dataset.detail,node.dataset.page||'intro'));
   node.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();openDetail(node.dataset.detail,node.dataset.page||'intro')}});
@@ -1064,7 +1100,7 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
   document.body.style.overflow='';
  }
  $('launchClose').addEventListener('click',closeLaunchAnnouncement);
- function showHome(mode,resetVisit=false){clearNormalFlash();currentMode='home';stopTvSnow();stopBlackouts();stopClock();clearTimeout(questionTimer);clearTimeout(failTimer);verify.style.display='none';loading.style.display='none';entryLoading.style.display='none';stopFilm();$('normal').style.display=mode==='normal'?'block':'none';$('easter').style.display=mode==='easter'?'block':'none';soundBtn.style.display='block';document.body.style.background=mode==='easter'?'#6200ff':'#fff';document.title='카밀레교 | '+(mode==='easter'?'귀의를 환영합니다':'환영합니다');window.scrollTo(0,0);if(mode==='normal')scheduleNormalFlash();startVisit(resetVisit);if(!launchShown&&!endingStarted)openLaunchAnnouncement(mode)}
+ function showHome(mode,resetVisit=false){stopOathBell();clearNormalFlash();currentMode='home';stopTvSnow();stopBlackouts();stopClock();clearTimeout(questionTimer);clearTimeout(failTimer);verify.style.display='none';loading.style.display='none';entryLoading.style.display='none';stopFilm();$('normal').style.display=mode==='normal'?'block':'none';$('easter').style.display=mode==='easter'?'block':'none';soundBtn.style.display='block';document.body.style.background=mode==='easter'?'#6200ff':'#fff';document.title='카밀레교 | '+(mode==='easter'?'귀의를 환영합니다':'환영합니다');window.scrollTo(0,0);if(mode==='normal')scheduleNormalFlash();startVisit(resetVisit);if(!launchShown&&!endingStarted)openLaunchAnnouncement(mode)}
 })();
 </script>
 </body>

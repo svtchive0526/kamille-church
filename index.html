@@ -352,6 +352,11 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
 .mail-row h2{font-size:clamp(19px,3.5vw,30px);font-weight:850;margin:0}
 .mail-close{background:none;border:0;color:white;font-size:clamp(15px,2.7vw,22px);cursor:pointer;padding:5px}
 .mail-alert p{font-size:clamp(16px,2.9vw,24px);margin:14px 0 0;letter-spacing:-.04em}
+/* Six-second hidden-faith prompt: below the centered mail notification. */
+.mail-prompt[hidden]{display:none!important}
+.mail-prompt{position:absolute;top:calc(50% + 125px);left:6%;width:88%;color:#fff;text-align:center;font-size:clamp(17px,3.9vw,30px);line-height:1.5;font-weight:750;letter-spacing:-.055em;pointer-events:none;animation:mailPromptBlink 1s steps(1,end) infinite}
+@keyframes mailPromptBlink{0%,58%{opacity:1}59%,100%{opacity:0}}
+@media(max-width:520px){.mail-prompt{top:calc(50% + 110px);font-size:clamp(17px,4.4vw,23px)}}
 @media(min-width:1024px){.auth-fields{max-width:760px}.auth-row{grid-template-columns:165px minmax(0,1fr)}.auth-action{font-size:clamp(15px,1.4vw,19px)}.auth-hint{padding:40px}.oath-callout{min-height:265px}.oath-lines{font-size:20px}}
 @media(max-width:520px){.auth-row{grid-template-columns:25% minmax(0,1fr);gap:9px}.auth-row label{font-size:clamp(13px,3.25vw,17px)}.auth-input{padding:0 12px;font-size:clamp(13px,3.1vw,17px)}.auth-actions{gap:5px}.auth-action{font-size:clamp(11px,2.75vw,15px);padding:8px 5px}.auth-hint{padding:25px 20px}.mail-end{padding:0 9.5%}}
 
@@ -504,7 +509,7 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
 </main>
 <section id="errorScreen" class="error-screen" aria-live="polite"><div class="error-container"><h1 class="error-heading">페이지를 읽을 수 없습니다.</h1><p class="error-subheading">시간이 지난 뒤 다시 시도해주세요.</p><div class="error-card"><h2 class="error-card-title">오류에 대해 안내드립니다.</h2><p class="error-typing" id="errorTyping"></p></div></div></section>
 <div id="errorSignalOverlay" class="error-signal-overlay" aria-hidden="true"></div>
-<section id="mailEnd" class="mail-end"><div class="mail-alert"><div class="mail-row"><h2>메일이 도착했어요!</h2><button id="mailClose" class="mail-close" type="button">닫기</button></div><p>Next Stop... 2026.11.23.</p></div></section>
+<section id="mailEnd" class="mail-end"><div class="mail-alert"><div class="mail-row"><h2>메일이 도착했어요!</h2><button id="mailClose" class="mail-close" type="button">닫기</button></div><p>Next Stop... 2026.11.23.</p></div><div id="mailPrompt" class="mail-prompt" hidden aria-live="off">방문을 반복하고 숨겨진 신앙을 찾으세요</div></section>
 <script>
 (()=>{
  'use strict';
@@ -804,6 +809,7 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  const VISIT_MS=70000, TICK_START_MS=50000;
  let visitStarted=0,visitFrame=null,visitTickMark=-1,endingStarted=false;
  let recoveryTimer=null,errorTimer=null,mailTimer=null,signalTimer=null,loginView='main';
+ let mailPromptStartTimer=null,mailPromptEndTimer=null,mailPromptTickTimer=null;
  function clockTickDeadline(level){
   if(!soundEnabled||!audioCtx)return;
   // The same light bell-like tick, gradually louder between 50 and 70 seconds.
@@ -864,11 +870,29 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
   },920);
  }
  function mailSound(){tone(490,.22,.035,'sine');setTimeout(()=>tone(720,.4,.038,'sine'),160)}
- function showMail(){
-  currentMode='mail';$('errorScreen').style.display='none';document.body.style.background='#000';$('mailEnd').style.display='flex';
-  mailTimer=setTimeout(()=>{$('mailEnd').classList.add('arrived');mailSound()},380);
+ function stopMailPrompt(){
+  clearTimeout(mailPromptStartTimer);clearTimeout(mailPromptEndTimer);clearInterval(mailPromptTickTimer);
+  mailPromptStartTimer=mailPromptEndTimer=mailPromptTickTimer=null;
+  $('mailPrompt').hidden=true;
  }
- $('mailClose').addEventListener('click',()=>{$('mailEnd').classList.remove('arrived');$('mailEnd').style.display='none';currentMode='closed';document.body.style.background='#000'});
+ function showMail(){
+  stopMailPrompt();
+  currentMode='mail';$('errorScreen').style.display='none';document.body.style.background='#000';$('mailEnd').style.display='flex';
+  mailTimer=setTimeout(()=>{
+   if(currentMode!=='mail')return;
+   $('mailEnd').classList.add('arrived');mailSound();
+   // Allow the 650 ms slide-in to finish; wait a further 3 seconds.
+   mailPromptStartTimer=setTimeout(()=>{
+    if(currentMode!=='mail')return;
+    $('mailPrompt').hidden=false;
+    // Reuse the existing clear, ringing clock-tick sound every second.
+    clockTickDeadline(0.85);
+    mailPromptTickTimer=setInterval(()=>{if(currentMode==='mail'&&!$('mailPrompt').hidden)clockTickDeadline(0.85)},1000);
+    mailPromptEndTimer=setTimeout(()=>{stopMailPrompt()},6000);
+   },3650);
+  },380);
+ }
+ $('mailClose').addEventListener('click',()=>{stopMailPrompt();clearTimeout(mailTimer);$('mailEnd').classList.remove('arrived');$('mailEnd').style.display='none';currentMode='closed';document.body.style.background='#000'});
  function setLoginView(view){
   loginView=view;clearTimeout(recoveryTimer);
   $('loginMain').hidden=view!=='main';$('recoverPass').hidden=view!=='password';$('recoverCode').hidden=view!=='code';

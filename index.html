@@ -296,6 +296,19 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  .family-question-answer{font-size:clamp(17px,1.3vw,21px);line-height:1.68}
 }
 
+
+/* Attempting to leave during the three-bell oath triggers an intentional interruption. */
+.oath-guard[hidden]{display:none!important}
+.oath-guard{position:fixed;inset:0;z-index:49;display:flex;align-items:center;justify-content:center;overflow:hidden;background:rgba(0,0,0,.76);padding:20px;isolation:isolate}
+.oath-guard::before{content:"";position:absolute;inset:-10%;z-index:-1;opacity:.83;background:repeating-linear-gradient(0deg,rgba(220,230,222,.23) 0 2px,rgba(0,0,0,.8) 3px 6px,rgba(50,86,81,.4) 7px 9px,transparent 10px 14px),repeating-linear-gradient(90deg,rgba(245,245,245,.15) 0 2px,transparent 2px 7px);animation:oathGuardStatic .095s steps(3) infinite}
+.oath-guard::after{content:"";position:absolute;inset:0;z-index:-1;background:repeating-linear-gradient(0deg,transparent 0 46px,rgba(255,255,255,.2) 48px 50px,rgba(0,0,0,.72) 52px 64px,transparent 65px 112px);animation:oathGuardLines .2s steps(3) infinite}
+.oath-guard-panel{background:#0e2221;border:1px solid rgba(199,223,190,.28);border-radius:16px;width:min(90vw,560px);padding:clamp(28px,6vw,46px) 22px;text-align:center;box-shadow:0 0 38px rgba(0,0,0,.6);animation:oathGuardText .13s steps(2) infinite}
+.oath-guard-panel p{color:#f1f558;font-size:clamp(22px,5vw,38px);font-weight:850;letter-spacing:-.055em;line-height:1.35;margin:0;word-break:keep-all}
+@keyframes oathGuardStatic{0%{transform:translate(0)}33%{transform:translate(-16px,8px)}66%{transform:translate(13px,-7px)}100%{transform:translate(-3px,13px)}}
+@keyframes oathGuardLines{0%{transform:translateY(-20px)}50%{transform:translate(7px,12px)}100%{transform:translate(-9px,-7px)}}
+@keyframes oathGuardText{0%{transform:translate(-2px,0);text-shadow:2px 0 #4b837f}50%{transform:translate(2px,1px);text-shadow:-2px 0 #8c4376}100%{transform:translate(0,-1px)}}
+@media(prefers-reduced-motion:reduce){.oath-guard::before,.oath-guard::after,.oath-guard-panel{animation:none}}
+
 /* Login, recovery, oath and cinematic finale */
 #loginBody[hidden],#oathBody[hidden]{display:none!important}
 .auth-fields{display:grid;gap:15px;margin:clamp(27px,4vw,55px) 0 23px}
@@ -507,6 +520,7 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
   </div>
  </div>
 </main>
+<div id="oathGuard" class="oath-guard" role="alertdialog" aria-modal="true" aria-label="선서문 이탈 경고" hidden><div class="oath-guard-panel"><p>선서를 거부하시는 겁니까?</p></div></div>
 <section id="errorScreen" class="error-screen" aria-live="polite"><div class="error-container"><h1 class="error-heading">페이지를 읽을 수 없습니다.</h1><p class="error-subheading">시간이 지난 뒤 다시 시도해주세요.</p><div class="error-card"><h2 class="error-card-title">오류에 대해 안내드립니다.</h2><p class="error-typing" id="errorTyping"></p></div></div></section>
 <div id="errorSignalOverlay" class="error-signal-overlay" aria-hidden="true"></div>
 <section id="mailEnd" class="mail-end"><div class="mail-alert"><div class="mail-row"><h2>메일이 도착했어요!</h2><button id="mailClose" class="mail-close" type="button">닫기</button></div><p>Next Stop... 2026.11.23.</p></div><div id="mailPrompt" class="mail-prompt" hidden aria-live="off">방문을 반복하고 숨겨진 신앙을 찾으세요</div></section>
@@ -809,20 +823,39 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
  // Play three successive strikes. Deadline clock ticks use an independent audio path and remain audible.
  const oathBellFile=fetch('./oath-bell-05.mp3').then(r=>{if(!r.ok)throw new Error('Bell file not found');return r.arrayBuffer()}).catch(()=>null);
  let oathBellBuffer=null,oathBellNodes=[],oathBellSession=0;
+ let oathBellActive=false,oathGuardTimer=null;
+ function dismissOathGuard(){clearTimeout(oathGuardTimer);oathGuardTimer=null;$('oathGuard').hidden=true}
+ function interruptOathExit(){
+  if(!$('oathGuard').hidden||endingStarted)return;
+  const guard=$('oathGuard');guard.hidden=false;
+  // Mechanical static layered over the bell (and over deadline ticks if present).
+  for(let i=0;i<9;i++)setTimeout(()=>{if(!guard.hidden&&!endingStarted)noiseBurst(.09,.034,220+(i%4)*145)},i*115);
+  mechanicalImpact(0,.5,.68);
+  oathGuardTimer=setTimeout(()=>{
+   dismissOathGuard();
+   if(endingStarted||currentMode!=='detail'||detailPage!=='oath')return;
+   // Reaffirm the same oath page without stopping or restarting the three strikes.
+   paintDetail('easter');detail.classList.add('easter-detail');window.scrollTo(0,0);
+  },1550);
+ }
+ function oathExitBlocked(){return currentMode==='detail'&&detailMode==='easter'&&detailPage==='oath'&&oathBellActive&&!endingStarted}
+
  function stopOathBell(){
-  oathBellSession++;
+  oathBellActive=false;dismissOathGuard();oathBellSession++;
   oathBellNodes.forEach(n=>{try{n.stop()}catch(e){} try{n.disconnect()}catch(e){}});
   oathBellNodes=[];
  }
  async function playOathBellThreeTimes(){
   stopOathBell();
   const session=oathBellSession;
+  oathBellActive=true;
   // The card click is a user gesture, allowing Web Audio playback on mobile.
   if(!audioCtx||audioCtx.state!=='running')unlockAudio();
-  if(!audioCtx)return;
+  if(!audioCtx){oathBellActive=false;return;}
   try{
    const bytes=await oathBellFile;
-   if(!bytes||session!==oathBellSession)return;
+   if(!bytes){if(session===oathBellSession)oathBellActive=false;return;}
+   if(session!==oathBellSession)return;
    if(!oathBellBuffer)oathBellBuffer=await audioCtx.decodeAudioData(bytes.slice(0));
    if(session!==oathBellSession||currentMode!=='detail'||detailMode!=='easter'||detailPage!=='oath')return;
    await audioCtx.resume();
@@ -836,10 +869,13 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
     gain.gain.value=1.08;
     source.connect(gain);gain.connect(audioOutput);
     source.start(start+offset);
-    source.onended=()=>{try{source.disconnect();gain.disconnect()}catch(e){}};
+    source.onended=()=>{
+     try{source.disconnect();gain.disconnect()}catch(e){}
+     if(offset===13.0&&session===oathBellSession)oathBellActive=false;
+    };
     oathBellNodes.push(source);
    });
-  }catch(e){/* Missing or disabled audio must never block page navigation. */}
+  }catch(e){if(session===oathBellSession)oathBellActive=false;/* Missing or disabled audio must never block navigation. */}
  }
  // The 70-second window begins at entry, not during intro loading. One window per visit.
  const VISIT_MS=70000, TICK_START_MS=50000;
@@ -1075,7 +1111,7 @@ body.normal-flash-glitch .detail :is(h1,h2,h3,p,span) {animation:normalFlashText
   document.body.style.background=mode==='easter'?'#000':'#fff';
   document.title='카밀레교 | '+(page==='family'?'새 가족':'안내');window.scrollTo(0,0);scheduleLeak();if(mode==='normal')scheduleNormalFlash();if(mode==='easter'&&page==='oath')playOathBellThreeTimes();
  }
- function backFromDetail(){stopOathBell();clearTimeout(recoveryTimer);clearLeak();clearNormalFlash();detail.style.display='none';showHome(detailMode)}
+ function backFromDetail(){if(oathExitBlocked()){interruptOathExit();return;}stopOathBell();clearTimeout(recoveryTimer);clearLeak();clearNormalFlash();detail.style.display='none';showHome(detailMode)}
  document.querySelectorAll('[data-detail]').forEach(node=>{
   node.addEventListener('click',()=>openDetail(node.dataset.detail,node.dataset.page||'intro'));
   node.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();openDetail(node.dataset.detail,node.dataset.page||'intro')}});
